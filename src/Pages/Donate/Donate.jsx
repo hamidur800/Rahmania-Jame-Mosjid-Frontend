@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router";
 import { AuthContext } from "../../provider/AuthProvider";
 import axiosSecure from "../../api/axiosSecure";
-
+import Loading from "../../Componant/Loading/Loading";
 const Donate = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -451,6 +451,10 @@ const Donate = () => {
     }
   };
 
+  if (userLoading) {
+    return <Loading />;
+  }
+
   // ========================================
   // LOGIN REQUIRED PAGE
   // ========================================
@@ -486,7 +490,7 @@ const Donate = () => {
   // MAIN UI
   // ========================================
   return (
-    <section className="min-h-screen bg-gray-50 px-3 py-6 pb-28 transition-colors duration-300 dark:bg-gray-950 sm:px-5 md:py-8">
+    <section className="min-h-screen bg-gray-50 px-3 py-6 pb-30 transition-colors duration-300 dark:bg-gray-950 sm:px-5 md:py-8">
       <div className="mx-auto w-full max-w-5xl">
         {/* HERO */}
         <div className="relative overflow-hidden rounded-3xl bg-[#087443] p-6 text-white shadow-lg sm:p-10">

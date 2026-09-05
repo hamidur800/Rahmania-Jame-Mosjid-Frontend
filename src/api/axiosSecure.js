@@ -2,7 +2,7 @@ import axios from "axios";
 import { getAuth } from "firebase/auth";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "https://rahmania-jame-mosjid-backend.onrender.com",
 });
 
 axiosSecure.interceptors.request.use(

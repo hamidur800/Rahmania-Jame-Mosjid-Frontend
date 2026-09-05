@@ -5,6 +5,7 @@ import axios from "axios";
 import { FaLocationDot, FaSun, FaCloudSun, FaMoon } from "react-icons/fa6";
 
 import { MdAccessTimeFilled } from "react-icons/md";
+import Loading from "../../Componant/Loading/Loading";
 
 const Prayers = () => {
   // ========================================
@@ -34,7 +35,9 @@ const Prayers = () => {
   useEffect(() => {
     const fetchPrayerTimes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/prayer-times");
+        const res = await axios.get(
+          "https://rahmania-jame-mosjid-backend.onrender.com/prayer-times",
+        );
 
         setPrayerTimes(res.data);
       } catch (error) {
@@ -282,26 +285,7 @@ const Prayers = () => {
   // ========================================
 
   if (loading) {
-    return (
-      <section
-        className="
-          min-h-screen bg-gray-50 px-3 py-6 pb-28
-          transition-colors duration-300
-          dark:bg-gray-950
-          sm:px-5 md:py-8
-        "
-      >
-        <div className="flex min-h-[400px] items-center justify-center">
-          <div className="text-center">
-            <span className="loading loading-spinner loading-lg text-[#087443] dark:text-green-400"></span>
-
-            <p className="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-              নামাজের সময়সূচি লোড হচ্ছে...
-            </p>
-          </div>
-        </div>
-      </section>
-    );
+    return <Loading />;
   }
 
   // ========================================

@@ -33,22 +33,44 @@ const Home = () => {
   // CURRENT DATE & TIME
   // ==================================================
 
-  const currentClock = currentTime.toLocaleTimeString("bn-BD", {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // ========================================
+  // CURRENT CLOCK
+  // ========================================
+
+  const timeParts = currentTime.toLocaleTimeString("bn-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
+    hour12: true,
   });
+
+  const [time, period] = timeParts.split(" ");
+
+  // ========================================
+  // CURRENT DAY
+  // ========================================
 
   const dayName = currentTime.toLocaleDateString("bn-BD", {
     weekday: "long",
   });
+
+  // ========================================
+  // CURRENT DATE
+  // ========================================
 
   const formattedDate = currentTime.toLocaleDateString("bn-BD", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
-
   // ==================================================
   // LOAD USER FROM MONGODB
   // ==================================================
@@ -94,7 +116,9 @@ const Home = () => {
   useEffect(() => {
     const loadPrayerTimes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/prayer-times");
+        const res = await axios.get(
+          "https://rahmania-jame-mosjid-backend.onrender.com/prayer-times",
+        );
         setPrayerTimes(res.data);
       } catch (error) {
         console.error("Prayer Times Error:", error);
@@ -399,9 +423,22 @@ const Home = () => {
                 </div>
               </div>
 
-              <p className="mt-3 text-lg font-bold text-white lg:text-2xl">
-                {currentClock}
-              </p>
+              {/* <p className="mt-3 text-lg font-bold text-white lg:text-2xl">
+                {time}
+              </p> */}
+              <div className="mt-3 flex items-end gap-2">
+                <div className="w-full">
+                  <p className="text-lg font-bold text-white lg:text-2xl">
+                    {time}
+                  </p>
+                </div>
+
+                <div className="w-fit">
+                  <span className="mb-1 text-xl font-semibold text-[#f2ce52]">
+                    {period}
+                  </span>
+                </div>
+              </div>
 
               <p className="mt-1 flex items-center gap-1 text-[9px] text-white/70 sm:text-[10px]">
                 <FaMapMarkerAlt />

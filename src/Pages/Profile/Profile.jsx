@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 
 import { AuthContext } from "../../provider/AuthProvider";
 import axiosSecure from "../../api/axiosSecure";
+import Loading from "../../Componant/Loading/Loading";
 
 const Profile = () => {
   const { user, logOut } = useContext(AuthContext);
@@ -137,6 +138,10 @@ const Profile = () => {
   const displayEmail = mongoUser?.email || user?.email || "ইমেইল পাওয়া যায়নি";
 
   const photoURL = mongoUser?.photoURL || user?.photoURL || "";
+
+  if (loadingUser) {
+    return <Loading />;
+  }
 
   return (
     <div

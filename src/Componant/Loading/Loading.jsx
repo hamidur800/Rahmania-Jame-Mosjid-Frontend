@@ -1,6 +1,6 @@
 import React from "react";
 import { FaMosque } from "react-icons/fa6";
-
+import Logo from "../../assets/logo.png";
 const Loading = () => {
   return (
     <section
