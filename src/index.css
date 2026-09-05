@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* =========================================
+   TAILWIND V4 DARK MODE CONFIGURATION
+========================================= */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================
+   THEME COLORS
+========================================= */
+
+@theme {
+  --color-main: #19243e;
+  --color-secondary: #0f766e;
+  --color-accent: #f59e0b;
+}
+
+/* =========================================
+   BODY DEFAULT STYLE
+========================================= */
+
+body {
+  font-family: "Mulish", "Hind Siliguri", sans-serif;
+  font-style: normal;
+  background-color: #f7faf8;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+body {
+  font-family: "Hind Siliguri", sans-serif;
+  font-style: normal;
+  background-color: #f7faf8;
+}
+
+/* =========================================
+   DARK MODE BODY
+========================================= */
+
+html.dark body {
+  background-color: #030712;
+  color: white;
+}
+
+/* =========================================
+   CATEGORY SCROLLBAR
+========================================= */
+
+.category-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-scroll::-webkit-scrollbar-thumb {
+  background: #19243e;
+  border-radius: 20px;
+}
+
+.category-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* =========================================
+   HIDE SCROLLBAR
+========================================= */
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
