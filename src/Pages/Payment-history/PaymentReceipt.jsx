@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-
+import Logo from "../../assets/logo.jpg";
 import {
   FaArrowLeft,
   FaMosque,
@@ -271,8 +271,12 @@ const PaymentReceipt = () => {
           {/* RECEIPT HEADER */}
 
           <div className="bg-[#087443] p-8 text-center text-white">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-3xl">
-              <FaMosque />
+            <div className="mx-auto flex h-30 w-30 items-center justify-center rounded-2xl bg-white/15 text-3xl">
+              <img
+                src={Logo}
+                alt="Rahmania Mosque Logo"
+                className="h-20 w-20 rounded-full object-cover"
+              />
             </div>
 
             <h1 className="mt-4 text-2xl font-bold">রাহমানিয়া জামে মসজিদ</h1>

@@ -142,7 +142,7 @@ const Home = () => {
 
   if (!user) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center bg-[#f7faf8] px-4 transition-colors duration-300 dark:bg-gray-950">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7faf8] px-4 transition-colors duration-300 dark:bg-gray-950">
         <div
           className="
             w-full max-w-md rounded-3xl border

@@ -14,7 +14,10 @@ import Swal from "sweetalert2";
 import { AuthContext } from "../../../provider/AuthProvider";
 
 const Register = () => {
-  const { createUser, googleLogin } = useContext(AuthContext);
+  // IMPORTANT:
+  // logOut must be taken from AuthContext
+  const { createUser, googleLogin, logOut } = useContext(AuthContext);
+
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -23,51 +26,120 @@ const Register = () => {
   // ==========================================
   // API BASE URL
   // ==========================================
-  const API_URL = "http://localhost:5000";
+  const API_URL = "https://rahmania-jame-mosjid-backend.onrender.com";
 
   // ==========================================
   // PHONE VALIDATION
   // ==========================================
   const validatePhone = (phone) => {
+    const cleanPhone = phone.replace(/\s+/g, "");
+
     const phoneRegex = /^(?:\+8801|01)[3-9]\d{8}$/;
-    return phoneRegex.test(phone);
+
+    return phoneRegex.test(cleanPhone);
+  };
+
+  // ==========================================
+  // LOGOUT + CLEANUP
+  // ==========================================
+  const cleanupAuth = async () => {
+    try {
+      await logOut();
+    } catch (error) {
+      console.error("Firebase logout failed:", error);
+    }
+
+    localStorage.removeItem("access-token");
   };
 
   // ==========================================
   // SAVE USER TO MONGODB
-  // FIREBASE ID TOKEN INCLUDED
   // ==========================================
   const saveUser = async (user, extraData = {}) => {
     try {
+      if (!user) {
+        throw new Error("Firebase user পাওয়া যায়নি।");
+      }
+
+      // ==========================================
+      // PHONE IS REQUIRED
+      // ==========================================
+      const phone = extraData.phone?.trim() || "";
+
+      if (!phone) {
+        throw new Error("ফোন নম্বর ছাড়া রেজিস্ট্রেশন সম্পন্ন করা যাবে না।");
+      }
+
+      // ==========================================
+      // PHONE VALIDATION
+      // ==========================================
+      if (!validatePhone(phone)) {
+        throw new Error("সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678");
+      }
+
       console.log("Firebase User:", user);
       console.log("Firebase UID:", user.uid);
 
-      const token = await user.getIdToken();
+      // ==========================================
+      // FIREBASE ID TOKEN
+      // ==========================================
+      const token = await user.getIdToken(true);
 
+      // ==========================================
+      // USER DATA
+      // ==========================================
       const userData = {
-        name: extraData.name || user.displayName || "User",
-        phone: extraData.phone || "",
+        name: extraData.name?.trim() || user.displayName?.trim() || "User",
+
+        phone,
+
         email: user.email,
+
         photoURL: user.photoURL || "",
+
         role: "user",
+
         authProvider: extraData.authProvider || "password",
+
         createdAt: new Date().toISOString(),
       };
 
+      console.log("Sending User Data:", userData);
+
+      // ==========================================
+      // SEND TO MONGODB
+      // ==========================================
       const response = await fetch(`${API_URL}/users`, {
         method: "POST",
+
         headers: {
-          "content-type": "application/json",
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const text = await response.text();
 
+      let data = {};
+
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {
+          message: text || "Server থেকে সঠিক response পাওয়া যায়নি।",
+        };
+      }
+
+      console.log("MongoDB Response:", data);
+
+      // ==========================================
+      // BACKEND ERROR
+      // ==========================================
       if (!response.ok) {
         throw new Error(
-          data.message || "ব্যবহারকারীর তথ্য সংরক্ষণ করা যায়নি।",
+          data.message || data.error || "ব্যবহারকারীর তথ্য সংরক্ষণ করা যায়নি।",
         );
       }
 
@@ -82,25 +154,46 @@ const Register = () => {
   // CREATE JWT TOKEN
   // ==========================================
   const getJwtToken = async (email) => {
-    const response = await fetch(`${API_URL}/jwt`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-      }),
-    });
+    try {
+      if (!email) {
+        throw new Error("Email পাওয়া যায়নি।");
+      }
 
-    const data = await response.json();
+      const response = await fetch(`${API_URL}/jwt`, {
+        method: "POST",
 
-    if (!response.ok || !data.token) {
-      throw new Error("অথেন্টিকেশন টোকেন তৈরি করা যায়নি।");
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          email,
+        }),
+      });
+
+      const text = await response.text();
+
+      let data = {};
+
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {};
+      }
+
+      console.log("JWT Response:", data);
+
+      if (!response.ok || !data.token) {
+        throw new Error(data.message || "অথেন্টিকেশন টোকেন তৈরি করা যায়নি।");
+      }
+
+      localStorage.setItem("access-token", data.token);
+
+      return data.token;
+    } catch (error) {
+      console.error("JWT Error:", error);
+      throw error;
     }
-
-    localStorage.setItem("access-token", data.token);
-
-    return data.token;
   };
 
   // ==========================================
@@ -131,7 +224,7 @@ const Register = () => {
     }
 
     // ==========================================
-    // PHONE VALIDATION
+    // PHONE REQUIRED
     // ==========================================
     if (!phone) {
       await Swal.fire({
@@ -144,11 +237,14 @@ const Register = () => {
       return;
     }
 
+    // ==========================================
+    // PHONE VALIDATION
+    // ==========================================
     if (!validatePhone(phone)) {
       await Swal.fire({
         icon: "warning",
         title: "ভুল ফোন নম্বর",
-        text: "অনুগ্রহ করে একটি সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678",
+        text: "সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678",
         confirmButtonColor: "#075c46",
       });
 
@@ -177,6 +273,10 @@ const Register = () => {
       // ==========================================
       const result = await createUser(email, password);
 
+      if (!result?.user) {
+        throw new Error("Firebase account তৈরি করা যায়নি।");
+      }
+
       // ==========================================
       // SAVE USER TO MONGODB
       // ==========================================
@@ -196,7 +296,7 @@ const Register = () => {
       // ==========================================
       await Swal.fire({
         icon: "success",
-        title: "মসজিদ হাবে স্বাগতম 🎉",
+        title: "রহমানিয়া জামে মসজিদে স্বাগতম 🎉",
         text: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।",
         timer: 1500,
         showConfirmButton: false,
@@ -208,12 +308,30 @@ const Register = () => {
     } catch (err) {
       console.error("Registration Error:", err);
 
-      Swal.fire({
+      // ==========================================
+      // IMPORTANT:
+      // If Firebase account was created but
+      // MongoDB/JWT failed, logout Firebase.
+      // ==========================================
+      await cleanupAuth();
+
+      let errorMessage = err?.message || "কিছু একটা সমস্যা হয়েছে।";
+
+      // ==========================================
+      // FIREBASE ERRORS
+      // ==========================================
+      if (err?.code === "auth/email-already-in-use") {
+        errorMessage = "এই ইমেইল দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে।";
+      } else if (err?.code === "auth/invalid-email") {
+        errorMessage = "ইমেইল ঠিকানাটি সঠিক নয়।";
+      } else if (err?.code === "auth/weak-password") {
+        errorMessage = "পাসওয়ার্ড আরও শক্তিশালী দিন।";
+      }
+
+      await Swal.fire({
         icon: "error",
         title: "রেজিস্ট্রেশন ব্যর্থ হয়েছে",
-        text:
-          err.message ||
-          "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+        text: errorMessage,
         confirmButtonColor: "#dc2626",
       });
     } finally {
@@ -223,10 +341,9 @@ const Register = () => {
 
   // ==========================================
   // GOOGLE REGISTER
-  // PHONE NUMBER IS MANDATORY
   // ==========================================
   const handleGoogleLogin = async () => {
-    let result = null;
+    let googleUser = null;
 
     try {
       setLoading(true);
@@ -234,78 +351,121 @@ const Register = () => {
       // ==========================================
       // GOOGLE LOGIN
       // ==========================================
-      result = await googleLogin();
+      const result = await googleLogin();
 
-      const googleUser = result.user;
+      if (!result?.user) {
+        throw new Error("Google account পাওয়া যায়নি।");
+      }
+
+      googleUser = result.user;
 
       const googleName = googleUser.displayName?.trim() || "Google User";
 
       const googleEmail = googleUser.email;
 
+      console.log("Google User:", googleUser);
+
+      console.log("Google Email:", googleEmail);
+
       // ==========================================
-      // PHONE NUMBER IS MANDATORY
+      // PHONE NUMBER POPUP
       // ==========================================
-      const { value: phone } = await Swal.fire({
-        title: "📱 ফোন নম্বর প্রয়োজন",
+      const phoneResult = await Swal.fire({
+        title: "ফোন নম্বর প্রয়োজন",
+
         html: `
-          <div style="font-size:14px;color:#6b7280;margin-bottom:10px;">
+          <div style="
+            font-size:14px;
+            color:#6b7280;
+            line-height:1.7;
+            margin-bottom:8px;
+          ">
             স্বাগতম <strong>${googleName}</strong>!<br/>
-            রেজিস্ট্রেশন সম্পন্ন করতে আপনার ফোন নম্বর দিতে হবে।
+            Google দিয়ে রেজিস্ট্রেশন সম্পন্ন করতে
+            আপনার ফোন নম্বর দিতে হবে।
           </div>
         `,
+
         input: "tel",
+
         inputLabel: "বাংলাদেশি ফোন নম্বর",
-        inputPlaceholder: "01712345678",
+
+        inputPlaceholder: "016XXXXXXXX",
+
         inputAttributes: {
-          maxlength: 14,
+          maxlength: "14",
           inputmode: "numeric",
           autocomplete: "tel",
         },
+
         confirmButtonText: "রেজিস্ট্রেশন সম্পন্ন করুন",
+
         confirmButtonColor: "#075c46",
+
+        showCancelButton: true,
+
+        cancelButtonText: "বাতিল",
+
         allowOutsideClick: false,
+
         allowEscapeKey: false,
-        showCancelButton: false,
 
         inputValidator: (value) => {
-          if (!value || !value.trim()) {
+          const cleanPhone = value?.trim() || "";
+
+          if (!cleanPhone) {
             return "ফোন নম্বর আবশ্যক!";
           }
 
-          const cleanPhone = value.trim();
-
           if (!validatePhone(cleanPhone)) {
-            return "অনুগ্রহ করে একটি সঠিক বাংলাদেশি ফোন নম্বর দিন।";
+            return "সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678";
           }
 
-          return null;
+          return undefined;
         },
       });
 
       // ==========================================
-      // IF PHONE IS NOT PROVIDED
-      // DELETE FIREBASE GOOGLE USER
+      // PHONE POPUP CANCELLED
       // ==========================================
-      if (!phone || !phone.trim()) {
-        try {
-          await googleUser.delete();
-        } catch (deleteError) {
-          console.error("Failed to delete Google user:", deleteError);
-        }
+      if (
+        phoneResult.isDismissed ||
+        !phoneResult.value ||
+        !phoneResult.value.trim()
+      ) {
+        console.log("Google registration cancelled - logging out Firebase.");
 
-        setLoading(false);
+        // VERY IMPORTANT
+        // Do NOT delete Google account.
+        // Just logout Firebase.
+        await cleanupAuth();
 
         await Swal.fire({
           icon: "warning",
+
           title: "রেজিস্ট্রেশন বাতিল হয়েছে",
-          text: "ফোন নম্বর প্রয়োজন। আপনার Google অ্যাকাউন্ট রেজিস্টার করা হয়নি।",
+
+          text: "ফোন নম্বর ছাড়া রেজিস্ট্রেশন সম্পন্ন করা যাবে না।",
+
           confirmButtonColor: "#075c46",
         });
 
         return;
       }
 
-      const cleanPhone = phone.trim();
+      // ==========================================
+      // CLEAN PHONE
+      // ==========================================
+      const cleanPhone = phoneResult.value.trim().replace(/\s+/g, "");
+
+      // ==========================================
+      // FINAL PHONE VALIDATION
+      // ==========================================
+      if (!validatePhone(cleanPhone)) {
+        throw new Error("সঠিক বাংলাদেশি ফোন নম্বর দিন।");
+      }
+
+      console.log("Google Registration Phone:", cleanPhone);
 
       // ==========================================
       // SAVE GOOGLE USER TO MONGODB
@@ -326,9 +486,13 @@ const Register = () => {
       // ==========================================
       await Swal.fire({
         icon: "success",
-        title: "মসজিদ হাবে স্বাগতম 🎉",
+
+        title: "রহমানিয়া জামে মসজিদে স্বাগতম 🎉",
+
         text: "Google দিয়ে রেজিস্ট্রেশন সফল হয়েছে।",
+
         timer: 1500,
+
         showConfirmButton: false,
       });
 
@@ -337,23 +501,37 @@ const Register = () => {
       console.error("Google Registration Error:", err);
 
       // ==========================================
-      // CLEANUP GOOGLE USER IF SOMETHING FAILED
+      // IMPORTANT:
+      // Never leave Firebase logged in when
+      // Google registration is incomplete.
       // ==========================================
-      if (result?.user) {
-        try {
-          await result.user.delete();
-          console.log("Incomplete Google registration user deleted.");
-        } catch (deleteError) {
-          console.error("Failed to cleanup Google user:", deleteError);
-        }
+      await cleanupAuth();
+
+      let errorMessage =
+        err?.message || "Google দিয়ে রেজিস্ট্রেশন করতে সমস্যা হয়েছে।";
+
+      // ==========================================
+      // GOOGLE POPUP ERRORS
+      // ==========================================
+      if (err?.code === "auth/popup-closed-by-user") {
+        errorMessage = "Google login popup বন্ধ করা হয়েছে।";
       }
 
-      Swal.fire({
+      if (err?.code === "auth/cancelled-popup-request") {
+        errorMessage = "Google login বাতিল করা হয়েছে।";
+      }
+
+      if (err?.code === "auth/popup-blocked") {
+        errorMessage = "Browser Google popup block করেছে। Popup allow করুন।";
+      }
+
+      await Swal.fire({
         icon: "error",
+
         title: "Google রেজিস্ট্রেশন ব্যর্থ হয়েছে",
-        text:
-          err.message ||
-          "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+
+        text: errorMessage,
+
         confirmButtonColor: "#dc2626",
       });
     } finally {
@@ -362,7 +540,7 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f8f6] px-4  pt-8 pb-25 transition-colors duration-300 dark:bg-gray-950">
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f8f6] px-4 pt-8 pb-25 transition-colors duration-300 dark:bg-gray-950">
       <div className="w-full max-w-md">
         {/* ==========================================
             LOGO
@@ -373,7 +551,7 @@ const Register = () => {
           </div>
 
           <h1 className="text-2xl font-bold text-[#075c46] dark:text-green-400">
-            মসজিদ হাব
+            রহমানিয়া জামে মসজিদ
           </h1>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">

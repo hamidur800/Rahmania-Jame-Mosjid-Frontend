@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-
+import Logo from "../../assets/logo.jpg";
 import {
   FaUser,
   FaUsers,
@@ -205,7 +205,7 @@ const CreateDonation = () => {
   // ==========================================
   const getDonationTypeLabel = (type) => {
     const labels = {
-      "Mosque Fund": "মসজিদ তহবিল",
+      "Mosque Maintenance": "মসজিদ রক্ষণাবেক্ষণ",
       "Imam Food Fee": "ইমামের খাবার",
       Zakat: "যাকাত",
       Sadaqah: "সাদাকাহ",
@@ -481,27 +481,27 @@ const CreateDonation = () => {
 
 ━━━━━━━━━━━━━━━━━━
 
-🧾 রসিদ নম্বর: ${receipt.receiptNo}
+ রসিদ নম্বর: ${receipt.receiptNo}
 
-👤 দাতার নাম: ${receipt.donorName}
+ দাতার নাম: ${receipt.donorName}
 
-📧 ইমেইল: ${receipt.donorEmail || "নেই"}
+ ইমেইল: ${receipt.donorEmail || "নেই"}
 
-📞 ফোন: ${receipt.donorPhone || "নেই"}
+ ফোন: ${receipt.donorPhone || "নেই"}
 
-🕌 দানের ধরন: ${getDonationTypeLabel(receipt.donationType)}
+ দানের ধরন: ${getDonationTypeLabel(receipt.donationType)}
 
-💳 পেমেন্ট পদ্ধতি: ${getPaymentMethodLabel(receipt.paymentMethod)}
+ পেমেন্ট পদ্ধতি: ${getPaymentMethodLabel(receipt.paymentMethod)}
 
-💰 দানের পরিমাণ: ৳${receipt.amount.toLocaleString("bn-BD")}
+ দানের পরিমাণ: ৳${receipt.amount.toLocaleString("bn-BD")}
 
-📅 দানের মাস: ${receipt.donationPeriod}
+ দানের মাস: ${receipt.donationPeriod}
 
-${receipt.note ? `📝 নোট: ${receipt.note}` : ""}
+${receipt.note ? ` নোট: ${receipt.note}` : ""}
 
 ━━━━━━━━━━━━━━━━━━
 
-জাযাকাল্লাহু খাইরান 🤲
+জাযাকাল্লাহু খাইরান 
 
 রাহমানিয়া জামে মসজিদ`;
 
@@ -571,18 +571,28 @@ ${receipt.note ? `📝 নোট: ${receipt.note}` : ""}
               margin-bottom: 25px;
             }
 
-            .logo {
-              width: 65px;
-              height: 65px;
-              margin: 0 auto 12px;
-              border-radius: 50%;
-              background: #15803d;
-              color: white;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 30px;
-            }
+            .logo-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.15);
+
+  font-size: 30px;
+}
+
+.mosque-logo {
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
 
             h1 {
               margin: 0;
@@ -673,8 +683,12 @@ ${receipt.note ? `📝 নোট: ${receipt.note}` : ""}
           <div class="receipt">
 
             <div class="header">
-              <div class="logo">
-                🕌
+              <div class="logo-container">
+                <img
+                   src="${Logo}"
+                   alt="Rahmania Mosque Logo"
+                   class="mosque-logo"
+                  />
               </div>
 
               <h1>
@@ -1085,9 +1099,10 @@ ${receipt.note ? `📝 নোট: ${receipt.note}` : ""}
                       onChange={handleChange}
                       className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm font-medium text-gray-800 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:ring-green-900/30"
                     >
-                      <option value="Mosque Fund">মসজিদ তহবিল</option>
-
                       <option value="Imam Food Fee">ইমামের খাবার</option>
+                      <option value="Mosque Maintenance">
+                        মসজিদ রক্ষণাবেক্ষণ
+                      </option>
 
                       <option value="Zakat">যাকাত</option>
 
@@ -1098,12 +1113,6 @@ ${receipt.note ? `📝 নোট: ${receipt.note}` : ""}
                       <option value="Construction Fund">নির্মাণ তহবিল</option>
 
                       <option value="Iftar Fund">ইফতার তহবিল</option>
-
-                      <option value="Madrasa Fund">মাদরাসা তহবিল</option>
-
-                      <option value="Orphan Fund">এতিম তহবিল</option>
-
-                      <option value="Other">অন্যান্য</option>
                     </select>
                   </div>
 

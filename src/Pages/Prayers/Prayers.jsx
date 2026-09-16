@@ -90,25 +90,18 @@ const Prayers = () => {
   // Format Date
   // ========================================
 
-  const formattedDate = currentTime.toLocaleDateString("bn-BD", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const dayName = currentTime.toLocaleDateString("bn-BD", {
-    weekday: "long",
-  });
-
   // ========================================
   // Format Current Clock
   // ========================================
 
-  const currentClock = currentTime.toLocaleTimeString("bn-BD", {
+  const timeParts = currentTime.toLocaleTimeString("Bn-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
+    hour12: true,
   });
+
+  const [time, period] = timeParts.split(" ");
 
   // ========================================
   // Prayer Data
@@ -366,6 +359,26 @@ const Prayers = () => {
                 md:min-w-[210px]
               "
             >
+              <div className="w-full">
+                <p className="text-lg font-bold text-white lg:text-2xl">
+                  {time}
+                </p>
+              </div>
+
+              <div className="w-fit">
+                <span className="mb-1 text-xl font-semibold text-[#f2ce52]">
+                  {period}
+                </span>
+              </div>
+            </div>
+
+            {/* <div
+              className="
+                rounded-2xl bg-white/10 p-4
+                backdrop-blur-sm
+                md:min-w-[210px]
+              "
+            >
               <p className="text-xs text-green-100">আজ</p>
 
               <h2 className="mt-1 text-xl font-bold">{formattedDate}</h2>
@@ -375,7 +388,7 @@ const Prayers = () => {
               <p className="mt-2 text-sm font-semibold text-white">
                 {currentClock}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -460,76 +473,86 @@ const Prayers = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {prayers.map((prayer) => (
               <div
                 key={prayer.name}
                 className={`
-                  rounded-2xl border p-4
-                  transition-all duration-300
-                  hover:-translate-y-1 hover:shadow-md
+        group relative overflow-hidden rounded-2xl border p-5
+        transition-all duration-300
+        hover:-translate-y-1 hover:shadow-lg
 
-                  ${
-                    prayer.active
-                      ? "border-[#087443] bg-[#087443] text-white shadow-lg shadow-green-900/10"
-                      : "border-gray-100 bg-white text-gray-800 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
-                  }
-                `}
+        ${
+          prayer.active
+            ? "border-[#087443] bg-[#087443] text-white shadow-md shadow-green-900/20"
+            : "border-gray-100 bg-white text-gray-800 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+        }
+      `}
               >
+                {/* Icon */}
                 <div
                   className={`
-                    flex h-11 w-11
-                    items-center justify-center
-                    rounded-xl text-lg
+          flex h-12 w-12 items-center justify-center
+          rounded-xl text-xl
+          transition-transform duration-300
+          group-hover:scale-105
 
-                    ${
-                      prayer.active
-                        ? "bg-white/15 text-white"
-                        : "bg-green-50 text-[#087443] dark:bg-green-950/60 dark:text-green-400"
-                    }
-                  `}
+          ${
+            prayer.active
+              ? "bg-white/15 text-white"
+              : "bg-green-50 text-[#087443] dark:bg-green-950/60 dark:text-green-400"
+          }
+        `}
                 >
                   {prayer.icon}
                 </div>
 
-                <h3 className="mt-4 text-base font-bold">{prayer.name}</h3>
+                {/* Prayer Name */}
+                <h3
+                  className={`
+          mt-4 text-2xl font-bold
+          ${prayer.active ? "text-white" : "text-gray-800 dark:text-white"}
+        `}
+                >
+                  {prayer.name}
+                </h3>
 
+                {/* Prayer Time */}
                 <p
                   className={`
-                    mt-1 text-lg font-bold
-                    ${
-                      prayer.active
-                        ? "text-white"
-                        : "text-[#087443] dark:text-green-400"
-                    }
-                  `}
+          mt-1 text-2xl font-extrabold tracking-wide
+          ${prayer.active ? "text-white" : "text-[#087443] dark:text-green-400"}
+        `}
                 >
                   {prayer.time}
                 </p>
 
+                {/* Label */}
                 <p
                   className={`
-                    mt-1 text-[11px]
-                    ${
-                      prayer.active
-                        ? "text-green-100"
-                        : "text-gray-400 dark:text-gray-500"
-                    }
-                  `}
+          mt-1  leading-5 font-medium text-xl
+          ${
+            prayer.active
+              ? "text-green-100 "
+              : "text-gray-500  dark:text-gray-400"
+          }
+        `}
                 >
                   {prayer.label}
                 </p>
 
+                {/* Active Status */}
                 {prayer.active && (
                   <span
                     className="
-                      mt-3 inline-flex rounded-full
-                      bg-white/15 px-2.5 py-1
-                      text-[10px] font-semibold
-                      text-white
-                    "
+            mt-4 inline-flex items-center
+            rounded-full bg-white/15
+            px-3 py-1.5
+            text-[11px] font-semibold
+            text-white
+          "
                   >
-                    এখন চলছে
+                    ● এখন চলছে
                   </span>
                 )}
               </div>

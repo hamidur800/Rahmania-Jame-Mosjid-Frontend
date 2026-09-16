@@ -41,15 +41,18 @@ const Login = () => {
       // =====================================================
       // JWT TOKEN
       // =====================================================
-      const res = await fetch("http://localhost:5000/jwt", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
+      const res = await fetch(
+        "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: result.user.email,
+          }),
         },
-        body: JSON.stringify({
-          email: result.user.email,
-        }),
-      });
+      );
 
       const data = await res.json();
 
@@ -120,15 +123,18 @@ const Login = () => {
       // =====================================================
       // JWT TOKEN
       // =====================================================
-      const res = await fetch("http://localhost:5000/jwt", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
+      const res = await fetch(
+        "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: firebaseUser.email,
+          }),
         },
-        body: JSON.stringify({
-          email: firebaseUser.email,
-        }),
-      });
+      );
 
       const data = await res.json();
 
@@ -179,7 +185,7 @@ const Login = () => {
           </div>
 
           <h1 className="text-2xl font-bold text-[#075c46] dark:text-green-400">
-            মসজিদ হাব
+            রহমানিয়া জামে মসজিদ
           </h1>
 
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">

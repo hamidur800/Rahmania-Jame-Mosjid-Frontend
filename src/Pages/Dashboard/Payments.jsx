@@ -37,7 +37,7 @@ const Payments = () => {
   // =====================================
 
   const categoryLabels = {
-    "Mosque Fund": "মসজিদ তহবিল",
+    "Mosque Maintenance": "মসজিদ রক্ষণাবেক্ষণ",
     "Imam Food Fee": "ইমামের খাবার",
     Zakat: "যাকাত",
     Sadaqah: "সাদাকাহ",

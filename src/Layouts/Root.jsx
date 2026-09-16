@@ -5,15 +5,20 @@ import Footer from "../Componant/Footer/Footer";
 const Root = () => {
   const location = useLocation();
 
-  const isReceiptPage = location.pathname.startsWith("/payment-receipt");
+  // যে page গুলোতে Header এবং Footer থাকবে না
+  const hideLayoutPages = ["/login", "/register", "/payment-receipt"];
+
+  const isHideLayoutPage = hideLayoutPages.some((path) =>
+    location.pathname.startsWith(path),
+  );
 
   return (
     <>
-      {!isReceiptPage && <Header />}
+      {!isHideLayoutPage && <Header />}
 
       <Outlet />
 
-      {!isReceiptPage && <Footer />}
+      {!isHideLayoutPage && <Footer />}
     </>
   );
 };

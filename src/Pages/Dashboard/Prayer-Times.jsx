@@ -78,7 +78,9 @@ const PrayerTimes = () => {
   useEffect(() => {
     const fetchPrayerTimes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/prayer-times");
+        const res = await axios.get(
+          "https://rahmania-jame-mosjid-backend.onrender.com/prayer-times",
+        );
 
         if (res.data) {
           setPrayerTimes({

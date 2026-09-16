@@ -483,7 +483,7 @@ const QiblaFinder = () => {
             </button>
 
             <p className="mt-4 text-xs text-gray-400 dark:text-gray-500">
-              📱 মোবাইল ফোনে ব্যবহার করলে সবচেয়ে ভালো ফলাফল পাবেন।
+              মোবাইল ফোনে ব্যবহার করলে সবচেয়ে ভালো ফলাফল পাবেন।
             </p>
           </div>
         )}
@@ -528,22 +528,22 @@ const QiblaFinder = () => {
               <div className="absolute inset-0">
                 {/* North */}
                 <span className="absolute left-1/2 top-4 -translate-x-1/2 text-sm font-bold text-red-500">
-                  উ
+                  প
                 </span>
 
                 {/* East */}
                 <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 dark:text-gray-400">
-                  পূ
+                  উ
                 </span>
 
                 {/* South */}
                 <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm font-bold text-gray-500 dark:text-gray-400">
-                  দ
+                  পূ
                 </span>
 
                 {/* West */}
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500 dark:text-gray-400">
-                  প
+                  দ
                 </span>
 
                 {/* Small Compass Marks */}
