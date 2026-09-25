@@ -465,7 +465,7 @@ const Register = () => {
       await Swal.fire({
         icon: "success",
         title: "রেজিস্ট্রেশন সফল! 🎉",
-        text: "Google account এবং আপনার তথ্য MongoDB-তে সংরক্ষণ করা হয়েছে।",
+        text: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।",
         confirmButtonText: "ঠিক আছে",
       });
 
