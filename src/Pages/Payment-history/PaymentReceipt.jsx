@@ -68,8 +68,6 @@ const PaymentReceipt = () => {
           },
         );
 
-        console.log("Payment Receipt:", res.data);
-
         setPayment(res.data);
       } catch (err) {
         console.error(
@@ -295,9 +293,10 @@ const PaymentReceipt = () => {
 
                 <p className="mt-1 font-bold text-gray-800 dark:text-white">
                   #
-                  {payment.receiptNo
+                  {/* {payment.receiptNo
                     ? payment.receiptNo.toString().padStart(6, "0")
-                    : "প্রযোজ্য নয়"}
+                    : "প্রযোজ্য নয়"} */}
+                  {payment.receiptNo}
                 </p>
               </div>
 

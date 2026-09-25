@@ -8,12 +8,14 @@ import {
   FaCamera,
   FaUser,
   FaEnvelope,
+  FaPhone,
   FaSave,
+  FaSpinner,
 } from "react-icons/fa";
 
 import { AuthContext } from "../../provider/AuthProvider";
 import axiosSecure from "../../api/axiosSecure";
-
+import Loading from "../../Componant/Loading/Loading";
 const EditProfile = () => {
   const { user, updateUserProfile } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -21,22 +23,57 @@ const EditProfile = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     photoURL: "",
   });
 
+  // Page data loading
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Update loading
   const [loading, setLoading] = useState(false);
 
   // =========================================================
   // LOAD USER DATA
   // =========================================================
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user?.displayName || "",
-        email: user?.email || "",
-        photoURL: user?.photoURL || "",
-      });
-    }
+    if (!user) return;
+
+    const loadUserData = async () => {
+      setProfileLoading(true);
+
+      try {
+        const response = await axiosSecure.get(
+          `/users/${encodeURIComponent(user.email)}`,
+        );
+
+        const userData = response.data;
+
+        setFormData({
+          name: user?.displayName || userData?.name || "",
+          email: user?.email || userData?.email || "",
+          phone: userData?.phone || "",
+          photoURL: user?.photoURL || userData?.photoURL || "",
+        });
+      } catch (error) {
+        console.error(
+          "Load Profile Error:",
+          error.response?.data || error.message,
+        );
+
+        // Firebase data দিয়ে fallback
+        setFormData({
+          name: user?.displayName || "",
+          email: user?.email || "",
+          phone: "",
+          photoURL: user?.photoURL || "",
+        });
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadUserData();
   }, [user]);
 
   // =========================================================
@@ -67,6 +104,21 @@ const EditProfile = () => {
       return;
     }
 
+    // =====================================================
+    // PHONE VALIDATION
+    // =====================================================
+    const phoneRegex = /^(?:\+8801|01)[3-9]\d{8}$/;
+
+    if (!phoneRegex.test(formData.phone)) {
+      Swal.fire({
+        icon: "warning",
+        title: "সঠিক ফোন নম্বর দিন",
+        text: "উদাহরণ: 01712345678 অথবা +8801712345678",
+      });
+
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -80,20 +132,16 @@ const EditProfile = () => {
 
       // =====================================================
       // 2. UPDATE MONGODB USER
-      //
-      // axiosSecure automatically sends:
-      // Authorization: Bearer Firebase_ID_TOKEN
       // =====================================================
       const response = await axiosSecure.patch(
         `/users/${encodeURIComponent(user.email)}`,
         {
           name: formData.name,
           email: formData.email,
+          phone: formData.phone,
           photoURL: formData.photoURL,
         },
       );
-
-      console.log("Profile updated:", response.data);
 
       // =====================================================
       // SUCCESS
@@ -125,6 +173,13 @@ const EditProfile = () => {
       setLoading(false);
     }
   };
+
+  // =========================================================
+  // PROFILE LOADING SCREEN
+  // =========================================================
+  if (profileLoading) {
+    return <Loading />;
+  }
 
   return (
     <div
@@ -250,9 +305,7 @@ const EditProfile = () => {
         "
       >
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* =================================================
-              NAME
-          ================================================== */}
+          {/* NAME */}
           <div>
             <label
               className="
@@ -302,9 +355,7 @@ const EditProfile = () => {
             </div>
           </div>
 
-          {/* =================================================
-              EMAIL
-          ================================================== */}
+          {/* EMAIL */}
           <div>
             <label
               className="
@@ -322,7 +373,7 @@ const EditProfile = () => {
                 flex items-center gap-3
                 rounded-xl
                 border border-gray-200
-                bg-white
+                bg-gray-50
                 px-4
                 dark:border-gray-700
                 dark:bg-gray-800
@@ -334,8 +385,62 @@ const EditProfile = () => {
                 type="email"
                 name="email"
                 value={formData.email}
+                disabled
+                color="blok"
+                className="
+                  w-full
+                  cursor-not-allowed
+                  bg-transparent
+                  py-4
+                  text-gray-500
+                  outline-none
+                  dark:text-gray-400
+                "
+              />
+            </div>
+
+            <p className="mt-2 text-xs text-red-500 dark:text-red-500">
+              নিরাপত্তার কারণে ইমেইল পরিবর্তন করা যাবে না।
+            </p>
+          </div>
+
+          {/* PHONE */}
+          <div>
+            <label
+              className="
+                mb-2 block
+                text-sm font-semibold
+                text-gray-700
+                dark:text-gray-200
+              "
+            >
+              ফোন নম্বর
+            </label>
+
+            <div
+              className="
+                flex items-center gap-3
+                rounded-xl
+                border border-gray-200
+                bg-white
+                px-4
+                transition
+                focus-within:border-[#087443]
+                dark:border-gray-700
+                dark:bg-gray-800
+                dark:focus-within:border-green-500
+              "
+            >
+              <FaPhone className="text-gray-400 dark:text-gray-500" />
+
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="আপনার ইমেইল লিখুন"
+                placeholder="01650053800"
+                required
+                maxLength={14}
                 className="
                   w-full
                   bg-transparent
@@ -349,14 +454,12 @@ const EditProfile = () => {
               />
             </div>
 
-            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-              ইমেইল পরিবর্তনের জন্য Firebase Authentication প্রয়োজন।
+            <p className="mt-2 text-xs text-red-500 dark:text-red-500">
+              whatsapp নাম্বার দিলে ভালো হয় উদাহরণ: 01712345678
             </p>
           </div>
 
-          {/* =================================================
-              PHOTO URL
-          ================================================== */}
+          {/* PHOTO URL */}
           <div>
             <label
               className="
@@ -395,9 +498,7 @@ const EditProfile = () => {
             />
           </div>
 
-          {/* =================================================
-              SAVE BUTTON
-          ================================================== */}
+          {/* SAVE BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -419,9 +520,17 @@ const EditProfile = () => {
               dark:hover:bg-green-600
             "
           >
-            <FaSave />
-
-            {loading ? "আপডেট হচ্ছে..." : "পরিবর্তন সংরক্ষণ করুন"}
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin" />
+                আপডেট হচ্ছে...
+              </>
+            ) : (
+              <>
+                <FaSave />
+                পরিবর্তন সংরক্ষণ করুন
+              </>
+            )}
           </button>
         </form>
       </div>
@@ -430,7 +539,7 @@ const EditProfile = () => {
           BOTTOM INFO
       ====================================================== */}
       <p className="mt-6 px-5 text-center text-[10px] text-gray-400 dark:text-gray-600">
-        আপনার তথ্য নিরাপদ রাখুন • মসজিদ হাব
+        আপনার তথ্য নিরাপদ রাখুন • রহমানিয়া জামে মসজিদ
       </p>
     </div>
   );

@@ -114,7 +114,7 @@ const Donate = () => {
         // ========================================
         const token = await user.getIdToken();
 
-        console.log("Firebase Token Available:", !!token);
+        // console.log("Firebase Token Available:", !!token);
 
         // ========================================
         // GET MONGODB USER DATA
@@ -130,7 +130,7 @@ const Donate = () => {
 
         const mongoUser = res.data;
 
-        console.log("MongoDB User:", mongoUser);
+        // console.log("MongoDB User:", mongoUser);
 
         setFormData((prev) => ({
           ...prev,
@@ -380,7 +380,7 @@ const Donate = () => {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("Donation Data:", donationData);
+      // console.log("Donation Data:", donationData);
 
       // ========================================
       // API REQUEST
@@ -391,7 +391,7 @@ const Donate = () => {
         },
       });
 
-      console.log("Donation Response:", res.data);
+      // console.log("Donation Response:", res.data);
 
       if (res.data) {
         setSuccess(

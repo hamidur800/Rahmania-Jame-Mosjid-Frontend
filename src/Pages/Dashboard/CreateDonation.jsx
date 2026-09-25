@@ -58,7 +58,7 @@ const CreateDonation = () => {
 
         const res = await axiosSecure.get("/users");
 
-        console.log("USERS API RESPONSE:", res.data);
+        // console.log("USERS API RESPONSE:", res.data);
 
         const data = res.data;
 
@@ -72,7 +72,7 @@ const CreateDonation = () => {
 
         setUsers(userList);
 
-        console.log("USERS LOADED:", userList);
+        // console.log("USERS LOADED:", userList);
       } catch (error) {
         console.error(
           "Failed to load users:",
@@ -152,7 +152,7 @@ const CreateDonation = () => {
   // SELECT USER
   // ==========================================
   const handleSelectUser = (user) => {
-    console.log("SELECTED USER:", user);
+    // console.log("SELECTED USER:", user);
 
     setSelectedUser(user);
     setSearch(user?.name || user?.email || "");
@@ -325,7 +325,7 @@ const CreateDonation = () => {
       note: formData.note,
     };
 
-    console.log("RECEIPT DATA:", receiptData);
+    // console.log("RECEIPT DATA:", receiptData);
 
     setReceipt(receiptData);
     setSaved(false);
@@ -398,11 +398,11 @@ const CreateDonation = () => {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("SAVING DONATION:", donationData);
+      // console.log("SAVING DONATION:", donationData);
 
       const res = await axiosSecure.post("/donations", donationData);
 
-      console.log("DONATION SAVED:", res.data);
+      // console.log("DONATION SAVED:", res.data);
 
       setSaved(true);
 

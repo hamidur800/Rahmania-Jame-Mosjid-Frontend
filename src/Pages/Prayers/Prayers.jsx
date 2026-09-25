@@ -337,14 +337,14 @@ const Prayers = () => {
               <div className="mb-3 flex items-center gap-2 text-green-100">
                 <FaLocationDot />
 
-                <span className="text-sm">রাহমানিয়া জামে মসজিদ</span>
+                <span className="text-lg">রাহমানিয়া জামে মসজিদ</span>
               </div>
 
               <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
                 নামাজের সময়সূচি
               </h1>
 
-              <p className="mt-2 max-w-lg text-sm text-green-100 sm:text-base">
+              <p className="mt-2 max-w-lg text-lg text-green-100 sm:text-base">
                 কোনো নামাজ যেন বাদ না যায়। প্রতিদিনের নামাজের সময়সূচির সাথে
                 নিজেকে যুক্ত রাখুন।
               </p>
@@ -426,7 +426,7 @@ const Prayers = () => {
               </div>
 
               <div>
-                <p className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                <p className="text-lg font-medium text-gray-400 dark:text-gray-500">
                   পরবর্তী নামাজ
                 </p>
 
@@ -434,7 +434,7 @@ const Prayers = () => {
                   {nextPrayer?.name || "নেই"}
                 </h2>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-lg text-gray-500 dark:text-gray-400">
                   {nextPrayer?.time || "--:--"}
                 </p>
               </div>
@@ -447,7 +447,7 @@ const Prayers = () => {
                 dark:bg-green-950/60
               "
             >
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-lg text-gray-400 dark:text-gray-500">
                 বাকি সময়
               </p>
 
@@ -463,11 +463,11 @@ const Prayers = () => {
         <div className="mt-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 আজকের নামাজ
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-lg text-gray-500 dark:text-gray-400">
                 আজকের পাঁচ ওয়াক্ত নামাজের সময়সূচি
               </p>
             </div>

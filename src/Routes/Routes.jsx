@@ -28,6 +28,8 @@ import CreateDonation from "../Pages/Dashboard/CreateDonation";
 import PrayerTimes from "../Pages/Dashboard/Prayer-Times";
 import Setting from "../Pages/Dashboard/Setting";
 import Settings from "../Pages/Settings/Settings";
+import UserPaymentHistory from "../Pages/Dashboard/UserPaymentHistory";
+import Contact from "../Pages/Contact/Contact";
 
 const router = createBrowserRouter([
   {
@@ -69,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "/qibla",
         element: <QiblaFinder />,
+      },
+      {
+        path: "/Contact",
+        element: <Contact />,
       },
       {
         path: "/library",
@@ -119,6 +125,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardHome />,
+      },
+      {
+        path: "users/:email/payment-history",
+        element: <UserPaymentHistory />,
       },
       {
         path: "users",

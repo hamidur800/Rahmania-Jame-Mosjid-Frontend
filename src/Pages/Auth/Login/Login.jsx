@@ -11,7 +11,7 @@ import {
 import Swal from "sweetalert2";
 
 import { AuthContext } from "../../../provider/AuthProvider";
-import axiosSecure from "../../../api/axiosSecure";
+import { requestNotificationPermission } from "../../../firebase/messaging";
 
 const Login = () => {
   const { signInUser, googleLogin } = useContext(AuthContext);
@@ -24,6 +24,87 @@ const Login = () => {
   // =========================================================
   // EMAIL / PASSWORD LOGIN
   // =========================================================
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+
+  //   const form = e.target;
+
+  //   const email = form.email.value.trim();
+  //   const password = form.password.value;
+
+  //   try {
+  //     setLoading(true);
+
+  //     // Firebase Login
+  //     const result = await signInUser(email, password);
+
+  //     // =====================================================
+  //     // JWT TOKEN
+  //     // =====================================================
+  //     const res = await fetch(
+  //       "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "content-type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           email: result.user.email,
+  //         }),
+  //       },
+  //     );
+
+  //     const data = await res.json();
+
+  //     if (data?.token) {
+  //       localStorage.setItem("access-token", data.token);
+  //     }
+
+  //     // Firebase auth token refresh
+  //     await result.user.getIdToken(true);
+  //     const fcmToken = await requestNotificationPermission();
+
+  //     if (fcmToken) {
+  //       await fetch(
+  //         "https://rahmania-jame-mosjid-backend.onrender.com/users/fcm-token",
+  //         {
+  //           method: "PATCH",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //           body: JSON.stringify({
+  //             email: firebaseUser.email,
+  //             fcmToken,
+  //           }),
+  //         },
+  //       );
+  //     }
+  //     await Swal.fire({
+  //       icon: "success",
+  //       title: "আবারও স্বাগতম! ",
+  //       text: "লগইন সফল হয়েছে।",
+  //       timer: 1500,
+  //       showConfirmButton: false,
+  //     });
+
+  //     navigate("/");
+  //   } catch (err) {
+  //     console.error("Login Error:", err);
+
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "লগইন ব্যর্থ হয়েছে",
+  //       text:
+  //         err?.response?.data?.message ||
+  //         err?.message ||
+  //         "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -35,37 +116,79 @@ const Login = () => {
     try {
       setLoading(true);
 
-      // Firebase Login
+      // =====================================================
+      // 1. Firebase Login
+      // =====================================================
       const result = await signInUser(email, password);
 
+      const firebaseUser = result.user;
+
+      // Firebase ID Token
+      const token = await firebaseUser.getIdToken(true);
+
       // =====================================================
-      // JWT TOKEN
+      // 2. JWT TOKEN
       // =====================================================
       const res = await fetch(
         "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
         {
           method: "POST",
           headers: {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: result.user.email,
+            email: firebaseUser.email,
           }),
         },
       );
 
       const data = await res.json();
 
-      if (data?.token) {
-        localStorage.setItem("access-token", data.token);
+      if (!res.ok || !data?.token) {
+        throw new Error(data?.message || "লগইন টোকেন তৈরি করা যায়নি");
       }
 
-      // Firebase auth token refresh
-      await result.user.getIdToken(true);
+      // MongoDB API-এর জন্য JWT
+      localStorage.setItem("access-token", data.token);
 
+      // =====================================================
+      // 3. Notification Permission + FCM Token
+      // =====================================================
+      const fcmToken = await requestNotificationPermission();
+
+      console.log("FCM Token:", fcmToken);
+
+      if (fcmToken) {
+        const fcmResponse = await fetch(
+          "https://rahmania-jame-mosjid-backend.onrender.com/users/fcm-token",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              email: firebaseUser.email,
+              fcmToken: fcmToken,
+            }),
+          },
+        );
+
+        const fcmData = await fcmResponse.json();
+
+        console.log("FCM Save Response:", fcmData);
+
+        if (!fcmResponse.ok) {
+          console.error("FCM token save failed:", fcmData);
+        }
+      }
+
+      // =====================================================
+      // 4. Success
+      // =====================================================
       await Swal.fire({
         icon: "success",
-        title: "আবারও স্বাগতম! 🌙",
+        title: "আবারও স্বাগতম!",
         text: "লগইন সফল হয়েছে।",
         timer: 1500,
         showConfirmButton: false,
@@ -79,7 +202,6 @@ const Login = () => {
         icon: "error",
         title: "লগইন ব্যর্থ হয়েছে",
         text:
-          err?.response?.data?.message ||
           err?.message ||
           "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
       });
@@ -88,88 +210,309 @@ const Login = () => {
     }
   };
 
-  // =========================================================
-  // GOOGLE LOGIN
-  // =========================================================
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     setLoading(true);
+
+  //     // 1. Google Login
+  //     const result = await googleLogin();
+  //     const firebaseUser = result.user;
+
+  //     const email = firebaseUser.email;
+  //     const name = firebaseUser.displayName || "User";
+  //     const photoURL = firebaseUser.photoURL || "";
+
+  //     // 2. Firebase ID Token
+  //     const token = await firebaseUser.getIdToken();
+
+  //     // 3. Check MongoDB user
+  //     const checkUserResponse = await fetch(
+  //       `https://rahmania-jame-mosjid-backend.onrender.com/users/check/${encodeURIComponent(
+  //         email,
+  //       )}`,
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       },
+  //     );
+
+  //     const checkUserData = await checkUserResponse.json();
+
+  //     let phone = "";
+
+  //     // 4. User doesn't exist in MongoDB
+  //     if (!checkUserData.exists) {
+  //       const { value: phoneNumber } = await Swal.fire({
+  //         title: "Phone Number",
+  //         input: "tel",
+  //         inputLabel: "Enter your Bangladesh phone number",
+  //         inputPlaceholder: "01XXXXXXXXX",
+  //         inputValue: "",
+  //         showCancelButton: true,
+  //         confirmButtonText: "Continue",
+  //         cancelButtonText: "Cancel",
+  //         inputValidator: (value) => {
+  //           if (!value) {
+  //             return "Phone number is required";
+  //           }
+
+  //           const phoneRegex = /^(?:\+8801|01)[3-9]\d{8}$/;
+
+  //           if (!phoneRegex.test(value.replace(/\s+/g, ""))) {
+  //             return "Please enter a valid Bangladesh phone number";
+  //           }
+
+  //           return null;
+  //         },
+  //       });
+
+  //       if (!phoneNumber) {
+  //         await logOut();
+  //         return;
+  //       }
+
+  //       phone = phoneNumber.replace(/\s+/g, "");
+
+  //       // 5. Save user to MongoDB
+  //       const createUserResponse = await fetch(
+  //         "https://rahmania-jame-mosjid-backend.onrender.com/users",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({
+  //             name,
+  //             email,
+  //             phone,
+  //             photoURL,
+  //             authProvider: "google",
+  //             createdAt: new Date().toISOString(),
+  //           }),
+  //         },
+  //       );
+
+  //       const createUserData = await createUserResponse.json();
+
+  //       // console.log("Create User Response:", createUserData);
+
+  //       if (!createUserResponse.ok) {
+  //         throw new Error(createUserData.message || "Failed to create user");
+  //       }
+  //     }
+
+  //     // 6. Get JWT token
+  //     const jwtResponse = await fetch(
+  //       "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           email,
+  //         }),
+  //       },
+  //     );
+
+  //     const jwtData = await jwtResponse.json();
+
+  //     if (!jwtResponse.ok) {
+  //       throw new Error(jwtData.message || "Failed to get JWT token");
+  //     }
+
+  //     localStorage.setItem("access-token", jwtData.token);
+
+  //     // 7. Success
+  //     await Swal.fire({
+  //       icon: "success",
+  //       title: "Login Successful",
+  //       text: "Welcome to Rahmania Jame Mosjid!",
+  //       timer: 1500,
+  //       showConfirmButton: false,
+  //     });
+
+  //     navigate("/");
+  //   } catch (error) {
+  //     console.error("Google Login Error:", error);
+
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Login Failed",
+  //       text: error.message || "Something went wrong",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
 
-      // Firebase Google Login
+      // ১. Google Login
       const result = await googleLogin();
-
       const firebaseUser = result.user;
 
-      // =====================================================
-      // SAVE / CREATE USER IN MONGODB
-      // =====================================================
-      try {
-        await axiosSecure.post("/users", {
-          name: firebaseUser.displayName || "User",
-          email: firebaseUser.email,
-          photoURL: firebaseUser.photoURL || "",
-          role: "user",
-          authProvider: "google",
-          createdAt: new Date().toISOString(),
+      const email = firebaseUser.email;
+      const name = firebaseUser.displayName || "ব্যবহারকারী";
+      const photoURL = firebaseUser.photoURL || "";
+
+      // ২. Firebase ID Token
+      const token = await firebaseUser.getIdToken();
+
+      // ৩. MongoDB-তে User আছে কিনা চেক করা
+      const checkUserResponse = await fetch(
+        `https://rahmania-jame-mosjid-backend.onrender.com/users/check/${encodeURIComponent(
+          email,
+        )}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const checkUserData = await checkUserResponse.json();
+
+      let phone = "";
+
+      // ৪. MongoDB-তে User না থাকলে Phone Number চাইবে
+      if (!checkUserData.exists) {
+        const { value: phoneNumber } = await Swal.fire({
+          title: "মোবাইল নম্বর দিন",
+          input: "tel",
+          inputLabel: "আপনার বাংলাদেশের মোবাইল নম্বর দিন",
+          inputPlaceholder: "01XXXXXXXXX",
+          inputValue: "",
+          showCancelButton: true,
+          confirmButtonText: "চালিয়ে যান",
+          cancelButtonText: "বাতিল করুন",
+          inputValidator: (value) => {
+            if (!value) {
+              return "মোবাইল নম্বর দেওয়া আবশ্যক";
+            }
+
+            const phoneRegex = /^(?:\+8801|01)[3-9]\d{8}$/;
+
+            if (!phoneRegex.test(value.replace(/\s+/g, ""))) {
+              return "সঠিক বাংলাদেশের মোবাইল নম্বর দিন";
+            }
+
+            return null;
+          },
         });
-      } catch (error) {
-        // User already exists হলে Google login বন্ধ হবে না
-        console.log(
-          "MongoDB user save info:",
-          error.response?.data || error.message,
+
+        // User Cancel করলে Google Logout
+        if (!phoneNumber) {
+          await logOut();
+          return;
+        }
+
+        phone = phoneNumber.replace(/\s+/g, "");
+
+        // ৫. User-কে MongoDB-তে Save করা
+        const createUserResponse = await fetch(
+          "https://rahmania-jame-mosjid-backend.onrender.com/users",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name,
+              email,
+              phone,
+              photoURL,
+              authProvider: "google",
+              createdAt: new Date().toISOString(),
+            }),
+          },
         );
+
+        const createUserData = await createUserResponse.json();
+
+        if (!createUserResponse.ok) {
+          throw new Error(
+            createUserData.message || "ব্যবহারকারীর তথ্য সংরক্ষণ করা যায়নি",
+          );
+        }
       }
 
-      // =====================================================
-      // JWT TOKEN
-      // =====================================================
-      const res = await fetch(
+      // ৬. JWT Token নেওয়া
+      const jwtResponse = await fetch(
         "https://rahmania-jame-mosjid-backend.onrender.com/jwt",
         {
           method: "POST",
           headers: {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: firebaseUser.email,
+            email,
           }),
         },
       );
 
-      const data = await res.json();
+      const jwtData = await jwtResponse.json();
 
-      if (data?.token) {
-        localStorage.setItem("access-token", data.token);
+      if (!jwtResponse.ok) {
+        throw new Error(jwtData.message || "লগইন টোকেন তৈরি করা যায়নি");
       }
 
-      // Firebase token refresh
-      await firebaseUser.getIdToken(true);
+      localStorage.setItem("access-token", jwtData.token);
 
+      // 🔔 Notification permission + FCM token
+      const fcmToken = await requestNotificationPermission();
+
+      if (fcmToken) {
+        await fetch(
+          "https://rahmania-jame-mosjid-backend.onrender.com/users/fcm-token",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              email: firebaseUser.email,
+              fcmToken,
+            }),
+          },
+        );
+      }
+
+      // 7. Success
       await Swal.fire({
         icon: "success",
-        title: "স্বাগতম! 🎉",
-        text: "Google দিয়ে লগইন সফল হয়েছে।",
+        title: "লগইন সফল হয়েছে",
+        text: "রহমানিয়া জামে মসজিদে আপনাকে স্বাগতম!",
         timer: 1500,
         showConfirmButton: false,
       });
 
       navigate("/");
-    } catch (err) {
-      console.error("Google Login Error:", err);
+
+      navigate("/");
+    } catch (error) {
+      console.error("Google Login Error:", error);
 
       Swal.fire({
         icon: "error",
-        title: "Google লগইন ব্যর্থ হয়েছে",
+        title: "লগইন ব্যর্থ হয়েছে",
         text:
-          err?.response?.data?.message ||
-          err?.message ||
-          "কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+          error.message || "দুঃখিত, কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
       });
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f5f8f6] px-4 pt-10 pb-25 transition-colors duration-300 dark:bg-gray-950">
       {/* =====================================================

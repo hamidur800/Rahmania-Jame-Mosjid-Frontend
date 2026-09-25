@@ -84,7 +84,6 @@ const Home = () => {
           `/users/${encodeURIComponent(user.email)}`,
         );
 
-        console.log("Loaded MongoDB user:", response.data);
         setMongoUser(response.data);
       } catch (error) {
         console.error(

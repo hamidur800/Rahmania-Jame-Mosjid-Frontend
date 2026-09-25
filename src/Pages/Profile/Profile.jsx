@@ -45,8 +45,6 @@ const Profile = () => {
           `/users/${encodeURIComponent(user.email)}`,
         );
 
-        console.log("Profile MongoDB User:", res.data);
-
         setMongoUser(res.data);
         setRole(res.data?.role || "user");
       } catch (error) {

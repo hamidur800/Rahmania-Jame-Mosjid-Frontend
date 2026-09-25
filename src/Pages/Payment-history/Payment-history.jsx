@@ -56,8 +56,6 @@ const PaymentHistory = () => {
           `/donations/${encodeURIComponent(user.email)}`,
         );
 
-        console.log("PAYMENT HISTORY RESPONSE:", res.data);
-
         const data = res.data;
 
         const donationList = Array.isArray(data)

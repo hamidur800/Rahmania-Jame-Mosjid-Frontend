@@ -29,7 +29,7 @@ const useUserRole = () => {
           `/users/${encodeURIComponent(user.email)}`,
         );
 
-        console.log("User Role:", res.data?.role);
+        // console.log("User Role:", res.data?.role);
 
         setRole(res.data?.role || "user");
       } catch (error) {

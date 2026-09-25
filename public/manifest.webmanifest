@@ -1,0 +1,25 @@
+{
+  "name": "Rahmania Jame Mosjid",
+  "short_name": "Rahmania Mosjid",
+  "description": "Rahmania Jame Mosjid - Connect, Pray & Grow",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f8f6",
+  "theme_color": "#075c46",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

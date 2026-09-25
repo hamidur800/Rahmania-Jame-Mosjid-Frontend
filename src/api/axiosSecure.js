@@ -17,12 +17,12 @@ axiosSecure.interceptors.request.use(
 
         config.headers.Authorization = `Bearer ${token}`;
 
-        console.log("Token added successfully");
+        // console.log("Token added successfully");
       } catch (error) {
         console.error("Token Error:", error);
       }
     } else {
-      console.log("No Firebase user found");
+      // console.log("No Firebase user found");
     }
 
     return config;

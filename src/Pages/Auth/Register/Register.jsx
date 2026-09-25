@@ -12,36 +12,30 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../../provider/AuthProvider";
+import { requestNotificationPermission } from "../../../firebase/messaging";
 
 const Register = () => {
-  // IMPORTANT:
-  // logOut must be taken from AuthContext
   const { createUser, googleLogin, logOut } = useContext(AuthContext);
-
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ==========================================
-  // API BASE URL
-  // ==========================================
   const API_URL = "https://rahmania-jame-mosjid-backend.onrender.com";
 
-  // ==========================================
-  // PHONE VALIDATION
-  // ==========================================
+  // =========================
+  // Phone Validation
+  // =========================
   const validatePhone = (phone) => {
     const cleanPhone = phone.replace(/\s+/g, "");
-
     const phoneRegex = /^(?:\+8801|01)[3-9]\d{8}$/;
 
     return phoneRegex.test(cleanPhone);
   };
 
-  // ==========================================
-  // LOGOUT + CLEANUP
-  // ==========================================
+  // =========================
+  // Cleanup Firebase Auth
+  // =========================
   const cleanupAuth = async () => {
     try {
       await logOut();
@@ -52,487 +46,450 @@ const Register = () => {
     localStorage.removeItem("access-token");
   };
 
-  // ==========================================
-  // SAVE USER TO MONGODB
-  // ==========================================
+  // =========================
+  // Save User to MongoDB
+  // =========================
   const saveUser = async (user, extraData = {}) => {
-    try {
-      if (!user) {
-        throw new Error("Firebase user পাওয়া যায়নি।");
-      }
-
-      // ==========================================
-      // PHONE IS REQUIRED
-      // ==========================================
-      const phone = extraData.phone?.trim() || "";
-
-      if (!phone) {
-        throw new Error("ফোন নম্বর ছাড়া রেজিস্ট্রেশন সম্পন্ন করা যাবে না।");
-      }
-
-      // ==========================================
-      // PHONE VALIDATION
-      // ==========================================
-      if (!validatePhone(phone)) {
-        throw new Error("সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678");
-      }
-
-      console.log("Firebase User:", user);
-      console.log("Firebase UID:", user.uid);
-
-      // ==========================================
-      // FIREBASE ID TOKEN
-      // ==========================================
-      const token = await user.getIdToken(true);
-
-      // ==========================================
-      // USER DATA
-      // ==========================================
-      const userData = {
-        name: extraData.name?.trim() || user.displayName?.trim() || "User",
-
-        phone,
-
-        email: user.email,
-
-        photoURL: user.photoURL || "",
-
-        role: "user",
-
-        authProvider: extraData.authProvider || "password",
-
-        createdAt: new Date().toISOString(),
-      };
-
-      console.log("Sending User Data:", userData);
-
-      // ==========================================
-      // SEND TO MONGODB
-      // ==========================================
-      const response = await fetch(`${API_URL}/users`, {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify(userData),
-      });
-
-      const text = await response.text();
-
-      let data = {};
-
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = {
-          message: text || "Server থেকে সঠিক response পাওয়া যায়নি।",
-        };
-      }
-
-      console.log("MongoDB Response:", data);
-
-      // ==========================================
-      // BACKEND ERROR
-      // ==========================================
-      if (!response.ok) {
-        throw new Error(
-          data.message || data.error || "ব্যবহারকারীর তথ্য সংরক্ষণ করা যায়নি।",
-        );
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Save User Error:", error);
-      throw error;
+    if (!user) {
+      throw new Error("Firebase user not found");
     }
+
+    const phone = extraData.phone?.replace(/\s+/g, "");
+
+    if (!phone) {
+      throw new Error("Phone number is required");
+    }
+
+    if (!validatePhone(phone)) {
+      throw new Error("Invalid Bangladeshi phone number");
+    }
+
+    // Firebase ID Token
+    const token = await user.getIdToken(true);
+
+    const userData = {
+      name: extraData.name?.trim() || user.displayName?.trim() || "User",
+
+      phone,
+
+      email: user.email,
+
+      photoURL: user.photoURL || "",
+
+      authProvider: extraData.authProvider || "password",
+
+      createdAt: new Date().toISOString(),
+    };
+
+    const response = await fetch(`${API_URL}/users`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+
+      body: JSON.stringify(userData),
+    });
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(
+        `Server returned invalid response: ${text || "Empty response"}`,
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Failed to save user in MongoDB");
+    }
+
+    return data;
   };
 
-  // ==========================================
-  // CREATE JWT TOKEN
-  // ==========================================
+  // =========================
+  // Get JWT Token
+  // =========================
   const getJwtToken = async (email) => {
+    const response = await fetch(`${API_URL}/jwt`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        email,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Failed to get JWT token");
+    }
+
+    if (!data?.token) {
+      throw new Error("JWT token was not returned");
+    }
+
+    localStorage.setItem("access-token", data.token);
+
+    return data.token;
+  };
+
+  // =========================
+  // Save FCM Token
+  // =========================
+  const saveFcmToken = async (user) => {
+    if (!user) {
+      throw new Error("Firebase user not found");
+    }
+
     try {
-      if (!email) {
-        throw new Error("Email পাওয়া যায়নি।");
+      // Firebase ID Token
+      const firebaseToken = await user.getIdToken(true);
+
+      // Request Notification Permission + Get FCM Token
+      const fcmToken = await requestNotificationPermission();
+
+      console.log("FCM Token:", fcmToken);
+
+      // Permission denied / token not available
+      if (!fcmToken) {
+        console.log("FCM token not available.");
+        return;
       }
 
-      const response = await fetch(`${API_URL}/jwt`, {
-        method: "POST",
+      // Save FCM Token to MongoDB
+      const response = await fetch(`${API_URL}/users/fcm-token`, {
+        method: "PATCH",
 
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${firebaseToken}`,
         },
 
         body: JSON.stringify({
-          email,
+          email: user.email,
+          fcmToken: fcmToken,
         }),
       });
 
-      const text = await response.text();
+      const data = await response.json();
 
-      let data = {};
+      console.log("FCM Save Response:", data);
 
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = {};
+      if (!response.ok) {
+        console.error("FCM token save failed:", data);
+
+        return;
       }
 
-      console.log("JWT Response:", data);
-
-      if (!response.ok || !data.token) {
-        throw new Error(data.message || "অথেন্টিকেশন টোকেন তৈরি করা যায়নি।");
-      }
-
-      localStorage.setItem("access-token", data.token);
-
-      return data.token;
+      console.log("FCM token saved successfully.");
     } catch (error) {
-      console.error("JWT Error:", error);
-      throw error;
+      // FCM error হলে registration/login fail করাবে না
+      console.error("FCM token error:", error);
     }
   };
 
-  // ==========================================
-  // NORMAL REGISTER
-  // ==========================================
+  // =========================
+  // Normal Registration
+  // =========================
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
 
     const form = e.target;
 
     const name = form.name.value.trim();
-    const phone = form.phone.value.trim();
+    const phone = form.phone.value.replace(/\s+/g, "");
     const email = form.email.value.trim();
     const password = form.password.value;
+    const terms = form.terms.checked;
 
-    // ==========================================
-    // NAME VALIDATION
-    // ==========================================
+    // Name
     if (!name) {
-      await Swal.fire({
+      return Swal.fire({
         icon: "warning",
-        title: "নাম প্রয়োজন",
-        text: "অনুগ্রহ করে আপনার পুরো নাম লিখুন।",
-        confirmButtonColor: "#075c46",
+        title: "নাম দিন",
+        text: "আপনার নাম লিখুন।",
       });
-
-      return;
     }
 
-    // ==========================================
-    // PHONE REQUIRED
-    // ==========================================
-    if (!phone) {
-      await Swal.fire({
-        icon: "warning",
-        title: "ফোন নম্বর প্রয়োজন",
-        text: "অ্যাকাউন্ট তৈরি করার জন্য ফোন নম্বর আবশ্যক।",
-        confirmButtonColor: "#075c46",
-      });
-
-      return;
-    }
-
-    // ==========================================
-    // PHONE VALIDATION
-    // ==========================================
+    // Phone
     if (!validatePhone(phone)) {
-      await Swal.fire({
+      return Swal.fire({
         icon: "warning",
-        title: "ভুল ফোন নম্বর",
-        text: "সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678",
-        confirmButtonColor: "#075c46",
+        title: "সঠিক ফোন নম্বর দিন",
+        text: "যেমন: 01712345678 অথবা +8801712345678",
       });
-
-      return;
     }
 
-    // ==========================================
-    // PASSWORD VALIDATION
-    // ==========================================
+    // Password
     if (password.length < 6) {
-      await Swal.fire({
+      return Swal.fire({
         icon: "warning",
-        title: "দুর্বল পাসওয়ার্ড",
+        title: "পাসওয়ার্ড ছোট",
         text: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",
-        confirmButtonColor: "#075c46",
       });
-
-      return;
     }
+
+    // Terms
+    if (!terms) {
+      return Swal.fire({
+        icon: "warning",
+        title: "শর্তাবলী গ্রহণ করুন",
+        text: "রেজিস্ট্রেশন করতে শর্তাবলী গ্রহণ করতে হবে।",
+      });
+    }
+
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      // ==========================================
-      // CREATE FIREBASE USER
-      // ==========================================
+      // =====================================================
+      // 1. Firebase Account Create
+      // =====================================================
       const result = await createUser(email, password);
 
       if (!result?.user) {
-        throw new Error("Firebase account তৈরি করা যায়নি।");
+        throw new Error("Firebase user creation failed");
       }
 
-      // ==========================================
-      // SAVE USER TO MONGODB
-      // ==========================================
-      await saveUser(result.user, {
+      const firebaseUser = result.user;
+
+      // =====================================================
+      // 2. MongoDB Save
+      // =====================================================
+      await saveUser(firebaseUser, {
         name,
         phone,
         authProvider: "password",
       });
 
-      // ==========================================
-      // CREATE JWT
-      // ==========================================
-      await getJwtToken(result.user.email);
+      // =====================================================
+      // 3. JWT Token
+      // =====================================================
+      await getJwtToken(firebaseUser.email);
 
-      // ==========================================
-      // SUCCESS
-      // ==========================================
+      // =====================================================
+      // 4. FCM Token
+      // =====================================================
+      await saveFcmToken(firebaseUser);
+
+      // =====================================================
+      // 5. Success
+      // =====================================================
       await Swal.fire({
         icon: "success",
-        title: "রহমানিয়া জামে মসজিদে স্বাগতম 🎉",
+        title: "রেজিস্ট্রেশন সফল!",
         text: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।",
-        timer: 1500,
-        showConfirmButton: false,
+        confirmButtonText: "ঠিক আছে",
       });
 
-      form.reset();
-
       navigate("/");
-    } catch (err) {
-      console.error("Registration Error:", err);
+    } catch (error) {
+      console.error("Registration error:", error);
 
-      // ==========================================
-      // IMPORTANT:
-      // If Firebase account was created but
-      // MongoDB/JWT failed, logout Firebase.
-      // ==========================================
       await cleanupAuth();
 
-      let errorMessage = err?.message || "কিছু একটা সমস্যা হয়েছে।";
+      let message = "রেজিস্ট্রেশন করা যায়নি। আবার চেষ্টা করুন।";
 
-      // ==========================================
-      // FIREBASE ERRORS
-      // ==========================================
-      if (err?.code === "auth/email-already-in-use") {
-        errorMessage = "এই ইমেইল দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট আছে।";
-      } else if (err?.code === "auth/invalid-email") {
-        errorMessage = "ইমেইল ঠিকানাটি সঠিক নয়।";
-      } else if (err?.code === "auth/weak-password") {
-        errorMessage = "পাসওয়ার্ড আরও শক্তিশালী দিন।";
+      if (error?.code === "auth/email-already-in-use") {
+        message = "এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট আছে।";
+      } else if (error?.code === "auth/invalid-email") {
+        message = "ইমেইল ঠিকানা সঠিক নয়।";
+      } else if (error?.code === "auth/weak-password") {
+        message = "পাসওয়ার্ড আরও শক্তিশালী দিন।";
+      } else if (error?.message) {
+        message = error.message;
       }
 
-      await Swal.fire({
+      Swal.fire({
         icon: "error",
-        title: "রেজিস্ট্রেশন ব্যর্থ হয়েছে",
-        text: errorMessage,
-        confirmButtonColor: "#dc2626",
+        title: "রেজিস্ট্রেশন ব্যর্থ",
+        text: message,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // ==========================================
-  // GOOGLE REGISTER
-  // ==========================================
+  // =========================
+  // Google Registration
+  // =========================
   const handleGoogleLogin = async () => {
-    let googleUser = null;
+    if (loading) return;
+
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      // ==========================================
-      // GOOGLE LOGIN
-      // ==========================================
+      // =====================================================
+      // 1. Google Login
+      // =====================================================
       const result = await googleLogin();
 
-      if (!result?.user) {
-        throw new Error("Google account পাওয়া যায়নি।");
+      const googleUser = result?.user;
+
+      if (!googleUser) {
+        throw new Error("Google user not found");
       }
 
-      googleUser = result.user;
-
-      const googleName = googleUser.displayName?.trim() || "Google User";
+      const googleName = googleUser.displayName?.trim() || "User";
 
       const googleEmail = googleUser.email;
 
-      console.log("Google User:", googleUser);
+      if (!googleEmail) {
+        throw new Error("Google account email not found");
+      }
 
-      console.log("Google Email:", googleEmail);
+      // =====================================================
+      // 2. Firebase Token
+      // =====================================================
+      const token = await googleUser.getIdToken(true);
 
-      // ==========================================
-      // PHONE NUMBER POPUP
-      // ==========================================
+      // =====================================================
+      // 3. Check if MongoDB user already exists
+      // =====================================================
+      const checkResponse = await fetch(
+        `${API_URL}/users/check/${encodeURIComponent(googleEmail)}`,
+        {
+          method: "GET",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      // =====================================================
+      // Already exists
+      // =====================================================
+      if (checkResponse.ok) {
+        await getJwtToken(googleEmail);
+
+        // Existing Google user-এর FCM token update
+        await saveFcmToken(googleUser);
+
+        await Swal.fire({
+          icon: "info",
+          title: "অ্যাকাউন্ট আগে থেকেই আছে",
+          text: "আপনার Google account দিয়ে ইতিমধ্যে অ্যাকাউন্ট তৈরি করা হয়েছে।",
+          confirmButtonText: "ঠিক আছে",
+        });
+
+        navigate("/");
+        return;
+      }
+
+      // =====================================================
+      // 4. Ask for phone number
+      // =====================================================
       const phoneResult = await Swal.fire({
-        title: "ফোন নম্বর প্রয়োজন",
-
-        html: `
-          <div style="
-            font-size:14px;
-            color:#6b7280;
-            line-height:1.7;
-            margin-bottom:8px;
-          ">
-            স্বাগতম <strong>${googleName}</strong>!<br/>
-            Google দিয়ে রেজিস্ট্রেশন সম্পন্ন করতে
-            আপনার ফোন নম্বর দিতে হবে।
-          </div>
-        `,
-
-        input: "tel",
-
-        inputLabel: "বাংলাদেশি ফোন নম্বর",
-
-        inputPlaceholder: "016XXXXXXXX",
+        title: "ফোন নম্বর দিন",
+        input: "text",
+        inputLabel: "আপনার মোবাইল নম্বর",
+        inputPlaceholder: "01712345678",
 
         inputAttributes: {
-          maxlength: "14",
-          inputmode: "numeric",
-          autocomplete: "tel",
+          maxlength: 14,
+          autocapitalize: "off",
+          autocorrect: "off",
         },
-
-        confirmButtonText: "রেজিস্ট্রেশন সম্পন্ন করুন",
-
-        confirmButtonColor: "#075c46",
 
         showCancelButton: true,
 
+        confirmButtonText: "চালিয়ে যান",
+
         cancelButtonText: "বাতিল",
 
-        allowOutsideClick: false,
-
-        allowEscapeKey: false,
-
         inputValidator: (value) => {
-          const cleanPhone = value?.trim() || "";
+          const phone = value?.replace(/\s+/g, "");
 
-          if (!cleanPhone) {
-            return "ফোন নম্বর আবশ্যক!";
+          if (!phone) {
+            return "ফোন নম্বর দিন";
           }
 
-          if (!validatePhone(cleanPhone)) {
-            return "সঠিক বাংলাদেশি ফোন নম্বর দিন। উদাহরণ: 01712345678";
+          if (!validatePhone(phone)) {
+            return "সঠিক বাংলাদেশি ফোন নম্বর দিন";
           }
 
           return undefined;
         },
       });
 
-      // ==========================================
-      // PHONE POPUP CANCELLED
-      // ==========================================
-      if (
-        phoneResult.isDismissed ||
-        !phoneResult.value ||
-        !phoneResult.value.trim()
-      ) {
-        console.log("Google registration cancelled - logging out Firebase.");
-
-        // VERY IMPORTANT
-        // Do NOT delete Google account.
-        // Just logout Firebase.
+      // =====================================================
+      // User Cancelled
+      // =====================================================
+      if (!phoneResult.isConfirmed) {
         await cleanupAuth();
 
         await Swal.fire({
-          icon: "warning",
-
-          title: "রেজিস্ট্রেশন বাতিল হয়েছে",
-
-          text: "ফোন নম্বর ছাড়া রেজিস্ট্রেশন সম্পন্ন করা যাবে না।",
-
-          confirmButtonColor: "#075c46",
+          icon: "info",
+          title: "বাতিল করা হয়েছে",
+          text: "Google registration বাতিল করা হয়েছে।",
         });
 
         return;
       }
 
-      // ==========================================
-      // CLEAN PHONE
-      // ==========================================
-      const cleanPhone = phoneResult.value.trim().replace(/\s+/g, "");
+      const cleanPhone = phoneResult.value.replace(/\s+/g, "");
 
-      // ==========================================
-      // FINAL PHONE VALIDATION
-      // ==========================================
-      if (!validatePhone(cleanPhone)) {
-        throw new Error("সঠিক বাংলাদেশি ফোন নম্বর দিন।");
-      }
-
-      console.log("Google Registration Phone:", cleanPhone);
-
-      // ==========================================
-      // SAVE GOOGLE USER TO MONGODB
-      // ==========================================
+      // =====================================================
+      // 5. Save Google User to MongoDB
+      // =====================================================
       await saveUser(googleUser, {
         name: googleName,
         phone: cleanPhone,
         authProvider: "google",
       });
 
-      // ==========================================
-      // CREATE JWT
-      // ==========================================
+      // =====================================================
+      // 6. JWT
+      // =====================================================
       await getJwtToken(googleEmail);
 
-      // ==========================================
-      // SUCCESS
-      // ==========================================
+      // =====================================================
+      // 7. FCM Token
+      // =====================================================
+      await saveFcmToken(googleUser);
+
+      // =====================================================
+      // 8. Success
+      // =====================================================
       await Swal.fire({
         icon: "success",
-
-        title: "রহমানিয়া জামে মসজিদে স্বাগতম 🎉",
-
-        text: "Google দিয়ে রেজিস্ট্রেশন সফল হয়েছে।",
-
-        timer: 1500,
-
-        showConfirmButton: false,
+        title: "রেজিস্ট্রেশন সফল! 🎉",
+        text: "Google account এবং আপনার তথ্য MongoDB-তে সংরক্ষণ করা হয়েছে।",
+        confirmButtonText: "ঠিক আছে",
       });
 
       navigate("/");
-    } catch (err) {
-      console.error("Google Registration Error:", err);
+    } catch (error) {
+      console.error("Google registration error:", error);
 
-      // ==========================================
-      // IMPORTANT:
-      // Never leave Firebase logged in when
-      // Google registration is incomplete.
-      // ==========================================
       await cleanupAuth();
 
-      let errorMessage =
-        err?.message || "Google দিয়ে রেজিস্ট্রেশন করতে সমস্যা হয়েছে।";
+      let message = "Google দিয়ে রেজিস্ট্রেশন করা যায়নি। আবার চেষ্টা করুন।";
 
-      // ==========================================
-      // GOOGLE POPUP ERRORS
-      // ==========================================
-      if (err?.code === "auth/popup-closed-by-user") {
-        errorMessage = "Google login popup বন্ধ করা হয়েছে।";
+      if (error?.code === "auth/popup-closed-by-user") {
+        message = "Google login popup বন্ধ করা হয়েছে।";
+      } else if (error?.code === "auth/popup-blocked") {
+        message =
+          "Browser popup block করেছে। Popup allow করে আবার চেষ্টা করুন।";
+      } else if (error?.message) {
+        message = error.message;
       }
 
-      if (err?.code === "auth/cancelled-popup-request") {
-        errorMessage = "Google login বাতিল করা হয়েছে।";
-      }
-
-      if (err?.code === "auth/popup-blocked") {
-        errorMessage = "Browser Google popup block করেছে। Popup allow করুন।";
-      }
-
-      await Swal.fire({
+      Swal.fire({
         icon: "error",
-
-        title: "Google রেজিস্ট্রেশন ব্যর্থ হয়েছে",
-
-        text: errorMessage,
-
-        confirmButtonColor: "#dc2626",
+        title: "Google Registration ব্যর্থ",
+        text: message,
       });
     } finally {
       setLoading(false);
@@ -540,218 +497,181 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f8f6] px-4 pt-8 pb-25 transition-colors duration-300 dark:bg-gray-950">
-      <div className="w-full max-w-md">
-        {/* ==========================================
-            LOGO
-        ========================================== */}
+    <div className="min-h-screen bg-[#f5f8f6] px-4 py-8">
+      <div className="mx-auto w-full max-w-md">
+        {/* Logo / Header */}
         <div className="mb-6 text-center">
-          <div className="mb-3 inline-flex h-15 w-15 items-center justify-center rounded-2xl bg-[#075c46] p-4 shadow-lg shadow-green-900/20">
-            <FaMosque className="text-2xl text-[#e9c46a]" />
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#075c46] text-[#e9c46a] shadow-lg">
+            <FaMosque className="text-3xl" />
           </div>
 
-          <h1 className="text-2xl font-bold text-[#075c46] dark:text-green-400">
+          <h1 className="text-2xl font-bold text-[#075c46]">
             রহমানিয়া জামে মসজিদ
           </h1>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             সংযুক্ত থাকুন • নামাজ পড়ুন • দ্বীনের পথে চলুন
           </p>
         </div>
 
-        {/* ==========================================
-            REGISTER CARD
-        ========================================== */}
-        <div className="rounded-[28px] border border-green-50 bg-white p-6 shadow-[0_15px_50px_rgba(0,70,50,0.08)] transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900 dark:shadow-black/30 sm:p-8">
+        {/* Register Card */}
+        <div className="rounded-3xl bg-white p-6 shadow-xl sm:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-800">
               অ্যাকাউন্ট তৈরি করুন
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              আমাদের কমিউনিটিতে যুক্ত হয়ে একসাথে দ্বীনের পথে এগিয়ে চলুন।
+            <p className="mt-1 text-sm text-gray-500">
+              রহমানিয়া জামে মসজিদের সাথে যুক্ত হতে রেজিস্টার করুন।
             </p>
           </div>
 
-          {/* ==========================================
-              NORMAL REGISTER FORM
-          ========================================== */}
+          {/* Google Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <FcGoogle className="text-xl" />
+
+            {loading ? "অপেক্ষা করুন..." : "Google দিয়ে চালিয়ে যান"}
+          </button>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+
+            <span className="text-xs text-gray-400">অথবা</span>
+
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-4">
-            {/* NAME */}
+            {/* Name */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                পুরো নাম <span className="text-red-500">*</span>
+              <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                নাম
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  name="name"
                   type="text"
+                  name="name"
+                  placeholder="আপনার নাম"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 outline-none transition focus:border-[#075c46] focus:bg-white"
                   required
-                  placeholder="আপনার পুরো নাম লিখুন"
-                  autoComplete="name"
-                  className="h-13 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-gray-800 outline-none transition focus:border-[#087f5b] focus:ring-4 focus:ring-green-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-green-500 dark:focus:ring-green-900/30"
                 />
               </div>
             </div>
 
-            {/* PHONE */}
+            {/* Phone */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                ফোন নম্বর <span className="text-red-500">*</span>
+              <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                ফোন নম্বর
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  name="phone"
                   type="tel"
-                  required
+                  name="phone"
                   placeholder="01712345678"
-                  inputMode="numeric"
-                  maxLength={14}
-                  autoComplete="tel"
-                  className="h-13 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-gray-800 outline-none transition focus:border-[#087f5b] focus:ring-4 focus:ring-green-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-green-500 dark:focus:ring-green-900/30"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 outline-none transition focus:border-[#075c46] focus:bg-white"
+                  required
                 />
               </div>
-
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                উদাহরণ: 01712345678
-              </p>
             </div>
 
-            {/* EMAIL */}
+            {/* Email */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                ইমেইল ঠিকানা <span className="text-red-500">*</span>
+              <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                ইমেইল
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  name="email"
                   type="email"
+                  name="email"
+                  placeholder="example@gmail.com"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 outline-none transition focus:border-[#075c46] focus:bg-white"
                   required
-                  placeholder="আপনার ইমেইল লিখুন"
-                  autoComplete="email"
-                  className="h-13 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-gray-800 outline-none transition focus:border-[#087f5b] focus:ring-4 focus:ring-green-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-green-500 dark:focus:ring-green-900/30"
                 />
               </div>
             </div>
 
-            {/* PASSWORD */}
+            {/* Password */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                পাসওয়ার্ড <span className="text-red-500">*</span>
+              <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                পাসওয়ার্ড
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  name="password"
                   type={showPassword ? "text" : "password"}
-                  required
+                  name="password"
+                  placeholder="কমপক্ষে ৬ অক্ষর"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-12 outline-none transition focus:border-[#075c46] focus:bg-white"
                   minLength={6}
-                  placeholder="একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন"
-                  autoComplete="new-password"
-                  className="h-13 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-12 text-gray-800 outline-none transition focus:border-[#087f5b] focus:ring-4 focus:ring-green-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-green-500 dark:focus:ring-green-900/30"
+                  required
                 />
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-[#087f5b] dark:hover:text-green-400"
-                  title={showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#075c46]"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                কমপক্ষে ৬ অক্ষর হতে হবে
-              </p>
             </div>
 
-            {/* TERMS */}
-            <label className="flex cursor-pointer items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+            {/* Terms */}
+            <label className="flex cursor-pointer items-start gap-2 text-sm text-gray-600">
               <input
                 type="checkbox"
-                required
-                className="mt-0.5 accent-[#075c46]"
+                name="terms"
+                className="mt-1 accent-[#075c46]"
               />
 
               <span>
-                আমি{" "}
-                <span className="font-semibold text-[#075c46] dark:text-green-400">
-                  শর্তাবলী
+                আমি মসজিদের{" "}
+                <span className="font-semibold text-[#075c46]">
+                  নিয়ম ও শর্তাবলী
                 </span>{" "}
-                এবং গোপনীয়তা নীতিতে সম্মত আছি।
+                মেনে চলতে সম্মত।
               </span>
             </label>
 
-            {/* REGISTER BUTTON */}
+            {/* Submit */}
             <button
-              disabled={loading}
               type="submit"
-              className="h-13 w-full rounded-xl bg-[#075c46] font-semibold text-white shadow-lg shadow-green-900/20 transition hover:bg-[#064b3a] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading}
+              className="w-full rounded-xl bg-[#075c46] px-4 py-3 font-bold text-white shadow-md transition hover:bg-[#064b3a] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
+              {loading ? "রেজিস্টার হচ্ছে..." : "রেজিস্টার করুন"}
             </button>
           </form>
 
-          {/* ==========================================
-              DIVIDER
-          ========================================== */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-
-            <span className="text-xs font-medium text-gray-400">অথবা</span>
-
-            <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          {/* ==========================================
-              GOOGLE REGISTER
-          ========================================== */}
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            type="button"
-            className="flex h-13 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-750"
-          >
-            <FcGoogle size={22} />
-
-            {loading
-              ? "অনুগ্রহ করে অপেক্ষা করুন..."
-              : "Google দিয়ে চালিয়ে যান"}
-          </button>
-
-          {/* ==========================================
-              LOGIN
-          ========================================== */}
-          <p className="mt-7 text-center text-sm text-gray-500 dark:text-gray-400">
-            আপনার কি ইতোমধ্যে অ্যাকাউন্ট আছে?{" "}
+          {/* Login Link */}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
             <Link
               to="/login"
-              className="font-bold text-[#087f5b] hover:underline dark:text-green-400"
+              className="font-bold text-[#075c46] hover:underline"
             >
               লগইন করুন
             </Link>
           </p>
         </div>
-
-        {/* ==========================================
-            FOOTER
-        ========================================== */}
-        <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
-          &copy; {new Date().getFullYear()} মসজিদ হাব • উম্মাহর জন্য ভালোবাসা
-          দিয়ে তৈরি 🤍
-        </p>
       </div>
     </div>
   );
