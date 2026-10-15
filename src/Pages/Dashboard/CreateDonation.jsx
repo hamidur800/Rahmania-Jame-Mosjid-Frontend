@@ -115,23 +115,17 @@ const CreateDonation = () => {
   const filteredUsers = useMemo(() => {
     const searchText = search.toLowerCase().trim();
 
-    if (!searchText) {
-      return users.slice(0, 8);
-    }
+    return users.filter((user) => {
+      const name = String(user?.name || "").toLowerCase();
+      const email = String(user?.email || "").toLowerCase();
+      const phone = String(user?.phone || "").toLowerCase();
 
-    return users
-      .filter((user) => {
-        const name = String(user?.name || "").toLowerCase();
-        const email = String(user?.email || "").toLowerCase();
-        const phone = String(user?.phone || "").toLowerCase();
-
-        return (
-          name.includes(searchText) ||
-          email.includes(searchText) ||
-          phone.includes(searchText)
-        );
-      })
-      .slice(0, 8);
+      return (
+        name.includes(searchText) ||
+        email.includes(searchText) ||
+        phone.includes(searchText)
+      );
+    });
   }, [users, search]);
 
   // ==========================================

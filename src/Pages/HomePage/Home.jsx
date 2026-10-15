@@ -97,41 +97,41 @@ const Home = () => {
   }, [user]);
 
   // ==================================================
-  // CURRENT TIME UPDATE
-  // ==================================================
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 30000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // ==================================================
   // LOAD PRAYER TIMES
   // ==================================================
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadPrayerTimes = async () => {
       try {
         const res = await axios.get(
           "https://rahmania-jame-mosjid-backend.onrender.com/prayer-times",
+          { timeout: 10000 },
         );
-        setPrayerTimes(res.data);
+
+        if (isMounted) {
+          setPrayerTimes(res.data);
+        }
       } catch (error) {
-        console.error("Prayer Times Error:", error);
+        if (isMounted) {
+          console.error("Prayer Times Error:", error.message);
+        }
       }
     };
 
     loadPrayerTimes();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // ==================================================
   // LOADING
   // ==================================================
 
-  if (loading || !prayerTimes) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -334,8 +334,7 @@ const Home = () => {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage:
-                "url('https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=1400&q=80')",
+              backgroundImage: "url('./mosque-hero.png')",
             }}
           />
 

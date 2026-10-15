@@ -1,5 +1,6 @@
 import { FaHome, FaMosque, FaBookOpen, FaUser } from "react-icons/fa";
 import { MdAccessTimeFilled } from "react-icons/md";
+import { IoIosContacts } from "react-icons/io";
 import { NavLink } from "react-router";
 
 const Footer = () => {
@@ -21,9 +22,9 @@ const Footer = () => {
       center: true,
     },
     {
-      name: "কুরআন",
-      path: "/quran",
-      icon: <FaBookOpen />,
+      name: "যোগাযোগ",
+      path: "/Contact",
+      icon: <IoIosContacts />,
     },
     {
       name: "প্রোফাইল",

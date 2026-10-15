@@ -280,7 +280,42 @@ const Register = () => {
       // =====================================================
       // 4. FCM Token
       // =====================================================
-      await saveFcmToken(firebaseUser);
+      try {
+        const fcmToken = await requestNotificationPermission();
+
+        if (fcmToken) {
+          const firebaseIdToken = await firebaseUser.getIdToken();
+
+          const response = await fetch(
+            "https://rahmania-jame-mosjid-backend.onrender.com/users/fcm-token",
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${firebaseIdToken}`,
+              },
+              body: JSON.stringify({
+                email: firebaseUser.email,
+                fcmToken,
+              }),
+            },
+          );
+
+          const result = await response.json();
+
+          console.log("Register FCM response:", result);
+
+          if (!response.ok) {
+            throw new Error(
+              result.message || "FCM Token MongoDB-তে save করা যায়নি",
+            );
+          }
+        } else {
+          console.warn("FCM token পাওয়া যায়নি।");
+        }
+      } catch (fcmError) {
+        console.error("Register FCM Error:", fcmError);
+      }
 
       // =====================================================
       // 5. Success

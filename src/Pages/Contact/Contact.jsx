@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   FaPhone,
   FaEnvelope,
-  FaLocationDot,
-  FaClock,
   FaPaperPlane,
   FaHeadset,
   FaComments,
@@ -11,7 +9,12 @@ import {
   FaCircleInfo,
   FaMosque,
   FaArrowRight,
+  FaWhatsapp,
 } from "react-icons/fa6";
+import Muazzin from "../../assets/muazzin.jpg";
+import Imam from "../../assets/imam.jpg";
+import Khatib from "../../assets/khatib.jpg";
+import { Link } from "react-router";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -91,7 +94,7 @@ const Contact = () => {
             <div className="mb-4 flex items-center gap-3 text-sm font-semibold text-[#087443]">
               <span className="h-px w-10 bg-[#087443]" />
 
-              <span>Get In Touch</span>
+              <span>যোগাযোগ করুন</span>
 
               <span className="h-px w-16 bg-[#087443]/40" />
             </div>
@@ -99,13 +102,13 @@ const Contact = () => {
             {/* Main Heading */}
 
             <h1 className="text-4xl font-bold leading-tight tracking-tight text-[#064e3b] sm:text-5xl lg:text-6xl">
-              Contact Us
+              আমাদের সাথে যোগাযোগ করুন
             </h1>
 
             <p className="mt-5 max-w-lg text-sm leading-7 text-[#365c50] sm:text-base">
-              We&apos;re here to help! Feel free to reach out to us for any
-              questions, suggestions, or support. Our team will get back to you
-              as soon as possible.
+              আমরা আপনাদের সহযোগিতায় সর্বদা প্রস্তুত। যেকোনো প্রশ্ন, পরামর্শ বা
+              সহযোগিতার প্রয়োজন হলে আমাদের সাথে যোগাযোগ করুন। আমরা যত দ্রুত
+              সম্ভব আপনাদের উত্তর দেওয়ার চেষ্টা করব।
             </p>
 
             {/* Quran Quote */}
@@ -119,10 +122,10 @@ const Contact = () => {
               </p>
 
               <p className="mt-2 text-sm font-medium text-[#365c50]">
-                &quot;My success is only by Allah.&quot;
+                “আমার সফলতা একমাত্র আল্লাহর পক্ষ থেকেই।”
               </p>
 
-              <p className="mt-1 text-xs text-[#54766b]">— Surah Hud (11:88)</p>
+              <p className="mt-1 text-xs text-[#54766b]">— সূরা হুদ (১১:৮৮)</p>
             </div>
           </div>
 
@@ -202,78 +205,261 @@ const Contact = () => {
           CONTACT INFO CARDS
       ===================================================== */}
 
-      <section className="relative z-20 -mt-1 px-5 py-12 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Phone */}
+      <section className="relative overflow-hidden bg-[#f5f9f7] px-5 py-16 sm:px-8 lg:px-12">
+        {/* Background Decoration */}
 
-          <div className="group rounded-2xl border border-[#dcece2] bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#087443] text-xl text-white shadow-md">
-              <FaPhone />
+        <div className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-[#087443]/5 blur-3xl" />
+
+        <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-[#e9c46a]/10 blur-3xl" />
+
+        <div className="relative mx-auto max-w-7xl">
+          {/* Section Heading */}
+
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#087443]/10 bg-white px-4 py-2 text-sm font-semibold text-[#087443] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[#087443]" />
+              আমাদের খেদমতকারীগণ
             </div>
 
-            <h3 className="mt-5 text-lg font-bold text-[#124b3b]">Phone</h3>
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#124b3b] sm:text-4xl lg:text-5xl">
+              ইমাম, মুয়াজ্জিন <span className="text-[#087443]">ও খতিব</span>
+            </h2>
 
-            <p className="mt-2 text-sm font-medium text-[#365c50]">
-              +880 1712 345678
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-gray-600 sm:text-base">
+              আমাদের মসজিদের সম্মানিত ইমাম, মুয়াজ্জিন ও খতিবের সাথে সহজেই
+              যোগাযোগ করুন।
             </p>
 
-            <p className="mt-1 text-xs text-gray-500">
-              Mon - Fri, 9:00 AM - 6:00 PM
-            </p>
+            {/* Decorative Line */}
+
+            <div className="mx-auto mt-6 flex items-center justify-center gap-2">
+              <span className="h-px w-12 bg-[#087443]/20" />
+
+              <span className="h-2 w-2 rotate-45 rounded-sm bg-[#e9c46a]" />
+
+              <span className="h-px w-12 bg-[#087443]/20" />
+            </div>
           </div>
 
-          {/* Email */}
+          {/* Team Grid */}
 
-          <div className="group rounded-2xl border border-[#dcece2] bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#087443] text-xl text-white shadow-md">
-              <FaEnvelope />
+          <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+            {/* ================= KHATIB ================= */}
+
+            <div className="group relative overflow-hidden rounded-[2rem] border border-[#dcece2] bg-white shadow-[0_8px_30px_rgba(8,116,67,0.06)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(8,116,67,0.14)] md:col-span-2 lg:col-span-1">
+              <div className="relative p-3">
+                <div className="relative h-72 overflow-hidden rounded-[1.5rem] bg-[#e8f5ee] sm:h-80">
+                  <img
+                    src={Khatib}
+                    alt="খতিব"
+                    className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-110"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#052e21]/70 via-transparent to-transparent opacity-70" />
+
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full border border-white/20 bg-[#087443]/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md">
+                    <span className="h-2 w-2 rounded-full bg-[#e9c46a]" />
+                    খতিব
+                  </div>
+
+                  <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-[#087443] shadow-md backdrop-blur">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#087443]" />
+                    যোগাযোগযোগ্য
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 pt-3">
+                <h3 className="text-xl font-extrabold text-[#124b3b]">
+                  মাওলানা খন্দকার আবু জাফর
+                </h3>
+
+                <p className="mt-1 text-sm font-semibold text-[#087443]">
+                  খতিব
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-gray-500">
+                  জুমার খুতবা, ইসলামী আলোচনা এবং বিভিন্ন ধর্মীয় অনুষ্ঠানে
+                  দিকনির্দেশনা প্রদান করেন। এছাড়াও ইসলামী ব্যাংকের ম্যানেজার।
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <a
+                    href="tel:+8801714024433"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#087443] text-sm font-bold text-white shadow-sm transition hover:bg-[#065d36] hover:shadow-md"
+                  >
+                    <FaPhone className="text-xs" />
+                    কল করুন
+                  </a>
+
+                  <a
+                    href="https://wa.me/8801714024433"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#087443]/20 bg-[#e8f5ee] text-sm font-bold text-[#087443] transition hover:bg-[#087443] hover:text-white"
+                  >
+                    <FaWhatsapp className="text-base" />
+                    হোয়াটসঅ্যাপ
+                  </a>
+                </div>
+
+                <a
+                  href="mailto:khatib@rahmaniamasjid.com"
+                  className="mt-3 flex items-center gap-3 rounded-xl border border-[#e5eee9] bg-[#f8fbf9] px-4 py-3 text-xs font-medium text-gray-600 transition hover:border-[#087443]/20 hover:bg-[#e8f5ee] hover:text-[#087443]"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#087443] shadow-sm">
+                    <FaEnvelope />
+                  </span>
+
+                  <span hidden className="truncate">
+                    khatib@rahmaniamasjid.com
+                  </span>
+                </a>
+              </div>
             </div>
 
-            <h3 className="mt-5 text-lg font-bold text-[#124b3b]">Email</h3>
+            {/* ================= IMAM ================= */}
 
-            <p className="mt-2 break-all text-sm font-medium text-[#365c50]">
-              info@rahmaniamasjid.org
-            </p>
+            <div className="group relative overflow-hidden rounded-[2rem] border border-[#dcece2] bg-white shadow-[0_8px_30px_rgba(8,116,67,0.06)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(8,116,67,0.14)]">
+              <div className="relative p-3">
+                <div className="relative h-72 overflow-hidden rounded-[1.5rem] bg-[#e8f5ee] sm:h-80">
+                  <img
+                    src={Imam}
+                    alt="ইমাম"
+                    className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-110"
+                  />
 
-            <p className="mt-1 text-xs text-gray-500">
-              We reply within 24 hours
-            </p>
-          </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#052e21]/70 via-transparent to-transparent opacity-70" />
 
-          {/* Address */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full border border-white/20 bg-[#087443]/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md">
+                    <span className="h-2 w-2 rounded-full bg-[#e9c46a]" />
+                    ইমাম
+                  </div>
 
-          <div className="group rounded-2xl border border-[#dcece2] bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#087443] text-xl text-white shadow-md">
-              <FaLocationDot />
+                  <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-[#087443] shadow-md backdrop-blur">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#087443]" />
+                    যোগাযোগযোগ্য
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 pt-3">
+                <h3 className="text-xl font-extrabold text-[#124b3b]">
+                  হাফেজ মোঃ ফায়জুর রহমান
+                </h3>
+
+                <p className="mt-1 text-sm font-semibold text-[#087443]">
+                  ইমাম
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-gray-500">
+                  পাঁচ ওয়াক্ত নামাজের ইমামতি, হিফ্জ বিভাগের দক্ষ শিক্ষক, ১৮-১৯
+                  বছরের অভিজ্ঞতা ইমামতি এবং শিক্ষকতার।
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <a
+                    href="tel:+8801927990665"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#087443] text-sm font-bold text-white shadow-sm transition hover:bg-[#065d36] hover:shadow-md"
+                  >
+                    <FaPhone className="text-xs" />
+                    কল করুন
+                  </a>
+
+                  <a
+                    href="https://wa.me/8801849817118"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#087443]/20 bg-[#e8f5ee] text-sm font-bold text-[#087443] transition hover:bg-[#087443] hover:text-white"
+                  >
+                    <FaWhatsapp className="text-base" />
+                    হোয়াটসঅ্যাপ
+                  </a>
+                </div>
+
+                <a className="mt-3 flex items-center gap-3 rounded-xl border border-[#e5eee9] bg-[#f8fbf9] px-4 py-3 text-xs font-medium text-gray-600 transition hover:border-[#087443]/20 hover:bg-[#e8f5ee] hover:text-[#087443]">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#087443] shadow-sm">
+                    <FaEnvelope />
+                  </span>
+
+                  <span hidden className="truncate">
+                    imam@rahmaniamasjid.com
+                  </span>
+                </a>
+              </div>
             </div>
 
-            <h3 className="mt-5 text-lg font-bold text-[#124b3b]">Address</h3>
+            {/* ================= MUAZZIN ================= */}
 
-            <p className="mt-2 text-sm font-medium text-[#365c50]">
-              123 Mosque Road,
-              <br />
-              Dhaka, Bangladesh
-            </p>
+            <div className="group relative overflow-hidden rounded-[2rem] border border-[#dcece2] bg-white shadow-[0_8px_30px_rgba(8,116,67,0.06)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(8,116,67,0.14)]">
+              <div className="relative p-3">
+                <div className="relative h-72 overflow-hidden rounded-[1.5rem] bg-[#e8f5ee] sm:h-80">
+                  <img
+                    src={Muazzin}
+                    alt="মুয়াজ্জিন"
+                    className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-110"
+                  />
 
-            <p className="mt-1 text-xs text-gray-500">Visit us anytime</p>
-          </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#052e21]/70 via-transparent to-transparent opacity-70" />
 
-          {/* Office Hours */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full border border-white/20 bg-[#087443]/90 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md">
+                    <span className="h-2 w-2 rounded-full bg-[#e9c46a]" />
+                    মুয়াজ্জিন
+                  </div>
 
-          <div className="group rounded-2xl border border-[#dcece2] bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#087443] text-xl text-white shadow-md">
-              <FaClock />
+                  <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-[#087443] shadow-md backdrop-blur">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#087443]" />
+                    যোগাযোগযোগ্য
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 pt-3">
+                <h3 className="text-xl font-extrabold text-[#124b3b]">
+                  হাফেজ মোঃ হামিদুর রহমান
+                </h3>
+
+                <p className="mt-1 text-sm font-semibold text-[#087443]">
+                  মুয়াজ্জিন
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-gray-500">
+                  আজান, ইকামত এবং মসজিদের দৈনন্দিন বিভিন্ন খেদমতের দায়িত্ব পালন
+                  করেন এবং ওয়েব ডেভেলপার হিসেবেও কাজ করেন।
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <a
+                    href="tel:+8801650053800"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#087443] text-sm font-bold text-white shadow-sm transition hover:bg-[#065d36] hover:shadow-md"
+                  >
+                    <FaPhone className="text-xs" />
+                    কল করুন
+                  </a>
+
+                  <a
+                    href="https://wa.me/8801650053800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#087443]/20 bg-[#e8f5ee] text-sm font-bold text-[#087443] transition hover:bg-[#087443] hover:text-white"
+                  >
+                    <FaWhatsapp className="text-base" />
+                    হোয়াটসঅ্যাপ
+                  </a>
+                </div>
+
+                <a
+                  href="mailto:hamidur800t@gmail.com"
+                  className="mt-3 flex items-center gap-3 rounded-xl border border-[#e5eee9] bg-[#f8fbf9] px-4 py-3 text-xs font-medium text-gray-600 transition hover:border-[#087443]/20 hover:bg-[#e8f5ee] hover:text-[#087443]"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-[#087443] shadow-sm">
+                    <FaEnvelope />
+                  </span>
+
+                  <span className="truncate">hamidur800t@gmail.com</span>
+                </a>
+              </div>
             </div>
-
-            <h3 className="mt-5 text-lg font-bold text-[#124b3b]">
-              Office Hours
-            </h3>
-
-            <p className="mt-2 text-sm font-medium text-[#365c50]">
-              Sat - Thu: 9:00 AM - 6:00 PM
-            </p>
-
-            <p className="mt-1 text-xs text-gray-500">Friday: Closed</p>
           </div>
         </div>
       </section>
@@ -284,9 +470,7 @@ const Contact = () => {
 
       <section className="px-5 pb-16 sm:px-8 lg:px-12">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1.55fr_0.9fr]">
-          {/* =================================================
-              CONTACT FORM
-          ================================================= */}
+          {/* CONTACT FORM */}
 
           <div className="rounded-2xl border border-[#dcece2] bg-white p-5 shadow-sm sm:p-7 lg:p-8">
             {/* Heading */}
@@ -298,12 +482,12 @@ const Contact = () => {
 
               <div>
                 <h2 className="text-2xl font-bold text-[#104c3b]">
-                  Send Us a Message
+                  আমাদের একটি বার্তা পাঠান
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  Fill out the form below and we&apos;ll get back to you
-                  promptly.
+                  নিচের ফর্মটি পূরণ করুন। আমরা যত দ্রুত সম্ভব আপনার সাথে যোগাযোগ
+                  করব।
                 </p>
               </div>
             </div>
@@ -312,7 +496,7 @@ const Contact = () => {
 
             {submitted && (
               <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                ✓ Thank you! Your message has been submitted successfully.
+                ✓ ধন্যবাদ! আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে।
               </div>
             )}
 
@@ -324,7 +508,7 @@ const Contact = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-[#244e42]">
-                    Full Name <span className="text-red-500">*</span>
+                    পূর্ণ নাম <span className="text-red-500">*</span>
                   </label>
 
                   <input
@@ -333,7 +517,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your full name"
+                    placeholder="আপনার পূর্ণ নাম লিখুন"
                     className="w-full rounded-xl border border-[#d6e7dc] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#087443] focus:ring-4 focus:ring-[#087443]/10"
                   />
                 </div>
@@ -342,7 +526,7 @@ const Contact = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-[#244e42]">
-                    Email Address <span className="text-red-500">*</span>
+                    ইমেইল ঠিকানা <span className="text-red-500">*</span>
                   </label>
 
                   <input
@@ -351,7 +535,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your email"
+                    placeholder="আপনার ইমেইল লিখুন"
                     className="w-full rounded-xl border border-[#d6e7dc] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#087443] focus:ring-4 focus:ring-[#087443]/10"
                   />
                 </div>
@@ -360,7 +544,7 @@ const Contact = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-[#244e42]">
-                    Phone Number
+                    মোবাইল নম্বর
                   </label>
 
                   <input
@@ -368,7 +552,7 @@ const Contact = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Enter your phone number"
+                    placeholder="আপনার মোবাইল নম্বর লিখুন"
                     className="w-full rounded-xl border border-[#d6e7dc] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#087443] focus:ring-4 focus:ring-[#087443]/10"
                   />
                 </div>
@@ -377,7 +561,7 @@ const Contact = () => {
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-[#244e42]">
-                    Subject
+                    বিষয়
                   </label>
 
                   <select
@@ -386,13 +570,15 @@ const Contact = () => {
                     onChange={handleChange}
                     className="w-full rounded-xl border border-[#d6e7dc] bg-white px-4 py-3 text-sm text-gray-600 outline-none transition focus:border-[#087443] focus:ring-4 focus:ring-[#087443]/10"
                   >
-                    <option value="">Select a subject</option>
-                    <option value="General Inquiry">General Inquiry</option>
-                    <option value="Donation">Donation</option>
-                    <option value="Prayer Time">Prayer Time</option>
-                    <option value="Event">Event</option>
-                    <option value="Feedback">Feedback</option>
-                    <option value="Technical Support">Technical Support</option>
+                    <option value="">একটি বিষয় নির্বাচন করুন</option>
+                    <option value="সাধারণ জিজ্ঞাসা">সাধারণ জিজ্ঞাসা</option>
+                    <option value="দান">দান</option>
+                    <option value="নামাজের সময়">নামাজের সময়</option>
+                    <option value="অনুষ্ঠান">অনুষ্ঠান</option>
+                    <option value="মতামত">মতামত</option>
+                    <option value="প্রযুক্তিগত সহায়তা">
+                      প্রযুক্তিগত সহায়তা
+                    </option>
                   </select>
                 </div>
               </div>
@@ -401,7 +587,7 @@ const Contact = () => {
 
               <div className="mt-5">
                 <label className="mb-2 block text-sm font-semibold text-[#244e42]">
-                  Your Message <span className="text-red-500">*</span>
+                  আপনার বার্তা <span className="text-red-500">*</span>
                 </label>
 
                 <textarea
@@ -410,7 +596,7 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows="6"
-                  placeholder="Write your message here..."
+                  placeholder="আপনার বার্তা এখানে লিখুন..."
                   className="w-full resize-none rounded-xl border border-[#d6e7dc] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#087443] focus:ring-4 focus:ring-[#087443]/10"
                 />
               </div>
@@ -422,14 +608,12 @@ const Contact = () => {
                 className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#087443] px-6 py-3 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#065d36] hover:shadow-md active:translate-y-0"
               >
                 <FaPaperPlane />
-                Send Message
+                বার্তা পাঠান
               </button>
             </form>
           </div>
 
-          {/* =================================================
-              RIGHT SIDE
-          ================================================= */}
+          {/* RIGHT SIDE */}
 
           <div className="space-y-6">
             {/* MAP */}
@@ -437,11 +621,12 @@ const Contact = () => {
             <div className="overflow-hidden rounded-2xl border border-[#dcece2] bg-white shadow-sm">
               <div className="h-[260px] w-full sm:h-[300px] lg:h-[250px]">
                 <iframe
-                  title="Mosque Location"
-                  src="https://www.google.com/maps?q=Dhaka,Bangladesh&output=embed"
+                  title="মসজিদের অবস্থান"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.9281868262615!2d89.16575517537302!3d23.535085178817898!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fee700517826a3%3A0x2f1bd96334657b0e!2sRahmania%20Jame%20Masjid!5e0!3m2!1sen!2sbd!4v1790413712894!5m2!1sen!2sbd"
                   className="h-full w-full border-0"
+                  allowFullScreen
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
               </div>
             </div>
@@ -455,7 +640,7 @@ const Contact = () => {
                 </div>
 
                 <h2 className="text-xl font-bold text-[#104c3b]">
-                  Why Contact Us?
+                  কেন আমাদের সাথে যোগাযোগ করবেন?
                 </h2>
               </div>
 
@@ -469,11 +654,11 @@ const Contact = () => {
 
                   <div>
                     <h3 className="font-semibold text-[#174d3e]">
-                      Get Support
+                      সহযোগিতা পান
                     </h3>
 
                     <p className="mt-1 text-xs leading-5 text-gray-500">
-                      Need help? We&apos;re here for you.
+                      কোনো সাহায্যের প্রয়োজন হলে আমরা আপনার পাশে আছি।
                     </p>
                   </div>
                 </div>
@@ -487,11 +672,11 @@ const Contact = () => {
 
                   <div>
                     <h3 className="font-semibold text-[#174d3e]">
-                      Share Your Feedback
+                      আপনার মতামত জানান
                     </h3>
 
                     <p className="mt-1 text-xs leading-5 text-gray-500">
-                      Your opinion matters to us.
+                      আপনার মূল্যবান মতামত আমাদের জন্য গুরুত্বপূর্ণ।
                     </p>
                   </div>
                 </div>
@@ -505,11 +690,11 @@ const Contact = () => {
 
                   <div>
                     <h3 className="font-semibold text-[#174d3e]">
-                      Partnership & Collaboration
+                      সহযোগিতা ও অংশীদারিত্ব
                     </h3>
 
                     <p className="mt-1 text-xs leading-5 text-gray-500">
-                      Let&apos;s work together for a better community.
+                      সুন্দর সমাজ গঠনে আমাদের সাথে একসাথে কাজ করুন।
                     </p>
                   </div>
                 </div>
@@ -523,11 +708,11 @@ const Contact = () => {
 
                   <div>
                     <h3 className="font-semibold text-[#174d3e]">
-                      General Inquiries
+                      সাধারণ জিজ্ঞাসা
                     </h3>
 
                     <p className="mt-1 text-xs leading-5 text-gray-500">
-                      Have a question? Just ask!
+                      কোনো প্রশ্ন থাকলে নির্দ্বিধায় আমাদের জিজ্ঞাসা করুন।
                     </p>
                   </div>
                 </div>
@@ -541,7 +726,7 @@ const Contact = () => {
           CTA SECTION
       ===================================================== */}
 
-      <section className="relative overflow-hidden bg-[#087443] px-5 py-10 sm:px-8">
+      <section className="relative overflow-hidden bg-[#087443] px-5 py-25 sm:px-8">
         {/* Decorative */}
 
         <div className="absolute -left-20 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border-[25px] border-white/5" />
@@ -549,30 +734,31 @@ const Contact = () => {
         <div className="absolute -right-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full border-[30px] border-white/5" />
 
         <div className="relative mx-auto flex max-w-5xl flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-          <div className="flex flex-col items-center gap-4 sm:flex-row">
+          <div className="flex flex-col  items-center gap-4 sm:flex-row">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/10 text-3xl text-white">
               <FaMosque />
             </div>
 
             <div>
               <h2 className="text-2xl font-bold text-white">
-                Together We Build a Stronger Ummah
+                আসুন, একসাথে একটি শক্তিশালী উম্মাহ গড়ে তুলি
               </h2>
 
               <p className="mt-1 text-sm text-white/80">
-                Your support and communication help us serve the community
-                better.
+                আপনাদের সহযোগিতা ও যোগাযোগ আমাদের আরও ভালোভাবে সমাজের সেবা করতে
+                সাহায্য করে।
               </p>
             </div>
           </div>
 
-          <button
+          <Link
+            to="/donate"
             type="button"
             className="inline-flex items-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-[#087443]"
           >
-            Support Our Mosque
+            মসজিদকে সহযোগিতা করুন
             <FaArrowRight />
-          </button>
+          </Link>
         </div>
       </section>
     </main>
