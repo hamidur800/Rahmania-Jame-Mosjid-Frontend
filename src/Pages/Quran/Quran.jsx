@@ -154,6 +154,7 @@ const readLastRead = () => {
 };
 
 const Quran = () => {
+  const [pageLoading, setPageLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("surah");
   const [search, setSearch] = useState("");
   const [surahs, setSurahs] = useState([]);
@@ -488,6 +489,78 @@ const Quran = () => {
     const term = search.trim().toLocaleLowerCase("bn");
     return !term || juz.name.includes(term) || String(juz.number) === term;
   });
+
+  // Load Quran page data
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSurahs = async () => {
+      setPageLoading(true);
+      setListLoading(true);
+      setError("");
+
+      try {
+        const cached = await getOfflineSurahs();
+
+        if (cached?.length === 114) {
+          if (!cancelled) {
+            setSurahs(cached);
+          }
+        } else if (navigator.onLine) {
+          const response = await fetch(`${API}/surah`);
+
+          if (!response.ok) {
+            throw new Error("সূরা তালিকা লোড হয়নি।");
+          }
+
+          const result = await response.json();
+
+          if (result.code !== 200 || !Array.isArray(result.data)) {
+            throw new Error("সূরা তালিকার ডেটা সঠিক নয়।");
+          }
+
+          if (!cancelled) {
+            setSurahs(result.data);
+          }
+        } else {
+          throw new Error(
+            "সূরা তালিকা অফলাইনে নেই। আগে ইন্টারনেট চালু করে Quran ডাউনলোড করো।",
+          );
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || "সূরা তালিকা লোড হয়নি।");
+        }
+      } finally {
+        if (!cancelled) {
+          setListLoading(false);
+          setPageLoading(false);
+        }
+      }
+    };
+
+    loadSurahs();
+
+    isQuranDownloaded()
+      .then((value) => {
+        if (!cancelled) {
+          setDownloaded(value);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDownloaded(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (pageLoading) {
+    return <Loading />;
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f8f6] px-3 py-25 text-gray-800 sm:px-6 lg:px-8">

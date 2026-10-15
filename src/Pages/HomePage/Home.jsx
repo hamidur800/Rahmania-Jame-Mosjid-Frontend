@@ -331,12 +331,15 @@ const Home = () => {
         >
           {/* Background */}
 
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('./mosque-hero.png')",
-            }}
-          />
+          <div className="absolute inset-0">
+            <img
+              src="/mosque-hero.png"
+              alt="Mosque"
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
 
           {/* Overlay */}
 
