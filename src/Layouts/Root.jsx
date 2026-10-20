@@ -5,18 +5,21 @@ import Footer from "../Componant/Footer/Footer";
 const Root = () => {
   const location = useLocation();
 
-  // যে page গুলোতে Header এবং Footer থাকবে না
+  // যেসব পেজে Header ও Footer থাকবে না
   const hideLayoutPages = ["/login", "/register", "/payment-receipt"];
 
-  const isHideLayoutPage = hideLayoutPages.some((path) =>
-    location.pathname.startsWith(path),
-  );
+  // Login, Register, Payment Receipt এবং Quran Reader পেজ
+  const isHideLayoutPage =
+    hideLayoutPages.some((path) => location.pathname.startsWith(path)) ||
+    location.pathname.startsWith("/quran/read/");
 
   return (
     <>
       {!isHideLayoutPage && <Header />}
 
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
 
       {!isHideLayoutPage && <Footer />}
     </>

@@ -30,6 +30,7 @@ import Setting from "../Pages/Dashboard/Setting";
 import Settings from "../Pages/Settings/Settings";
 import UserPaymentHistory from "../Pages/Dashboard/UserPaymentHistory";
 import Contact from "../Pages/Contact/Contact";
+import QuranReader from "../Pages/Quran/QuranReader";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
       {
         path: "/quran",
         element: <Quran />,
+      },
+      {
+        path: "/quran/read/:type/:number",
+        element: <QuranReader />,
       },
       {
         path: "/profile",
