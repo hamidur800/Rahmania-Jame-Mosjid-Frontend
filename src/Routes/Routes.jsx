@@ -31,6 +31,7 @@ import Settings from "../Pages/Settings/Settings";
 import UserPaymentHistory from "../Pages/Dashboard/UserPaymentHistory";
 import Contact from "../Pages/Contact/Contact";
 import QuranReader from "../Pages/Quran/QuranReader";
+import Dua from "../Pages/Duas/Dua";
 
 const router = createBrowserRouter([
   {
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
       {
         path: "/library",
         element: <BookLibrary />,
+      },
+      {
+        path: "/Duas",
+        element: <Dua />,
       },
       {
         path: "/announcements",

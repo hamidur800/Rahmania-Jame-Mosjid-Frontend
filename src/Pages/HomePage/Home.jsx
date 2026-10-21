@@ -292,8 +292,8 @@ const Home = () => {
       icon: <FaBullhorn />,
     },
     {
-      name: "লাইব্রেরি",
-      path: "/library",
+      name: "দোআ ও যিকির",
+      path: "/Duas",
       icon: <FaBook />,
     },
     {
