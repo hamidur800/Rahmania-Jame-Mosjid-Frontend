@@ -426,10 +426,10 @@ const Register = () => {
       // 4. Ask for phone number
       // =====================================================
       const phoneResult = await Swal.fire({
-        title: "ফোন নম্বর দিন",
+        title: "Whatsapp নাম্বার দিন",
         input: "text",
-        inputLabel: "আপনার মোবাইল নম্বর",
-        inputPlaceholder: "01712345678",
+        inputLabel: "আপনার Whatsapp নম্বর",
+        inputPlaceholder: "01212345678",
 
         inputAttributes: {
           maxlength: 14,
