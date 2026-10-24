@@ -6,7 +6,7 @@ const Root = () => {
   const location = useLocation();
 
   // যেসব পেজে Header ও Footer থাকবে না
-  const hideLayoutPages = ["/login", "/register", "/payment-receipt"];
+  const hideLayoutPages = ["/login", "/register", "/payment-receipt", "/Duas"];
 
   // Login, Register, Payment Receipt এবং Quran Reader পেজ
   const isHideLayoutPage =

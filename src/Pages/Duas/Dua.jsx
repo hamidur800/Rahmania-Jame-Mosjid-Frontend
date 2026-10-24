@@ -18,12 +18,15 @@ import {
   FaMosque,
   FaHeart,
   FaStar,
+  FaChevronLeft,
 } from "react-icons/fa";
+
 import {
   saveOfflineDuas,
   getOfflineDuas,
   getOfflineDuaCount,
 } from "../../utils/duaOffline";
+import { Link } from "react-router";
 
 const API_BASE = "https://rahmania-jame-mosjid-backend.onrender.com";
 // https://rahmania-jame-mosjid-backend.onrender.com
@@ -487,6 +490,16 @@ const Dua = () => {
 
   return (
     <main className="min-h-screen bg-[#f4f8f5] pb-12 pb-25 text-gray-800">
+      {/* <div className="mx-auto max-w-5xl py-5 px-4 ">
+        <Link
+          to="/"
+          type="button"
+          className="mb-5 inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 font-semibold transition hover:bg-white/25"
+        >
+          <FaChevronLeft />
+          ফিরে যান
+        </Link>
+      </div> */}
       <section className="bg-gradient-to-br from-[#075c46] to-[#087443] px-4 py-10 text-white sm:py-14">
         <div className="mx-auto max-w-5xl">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-3xl">
@@ -559,6 +572,19 @@ const Dua = () => {
               </p>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="my-5 mx-auto max-w-5xl sticky top-2 z-50  overflow-hidden rounded-3xl bg-gradient-to-br from-[#075c46] to-[#087443] p-5 text-white shadow-lg sm:p-7">
+        <div className="">
+          <Link
+            to="/"
+            type="button"
+            className=" inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 font-semibold transition hover:bg-white/25"
+          >
+            <FaChevronLeft />
+            ফিরে যান
+          </Link>
         </div>
       </section>
 

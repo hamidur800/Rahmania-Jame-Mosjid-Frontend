@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router";
-import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaBookmark,
-  FaSpinner,
-} from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaBookmark } from "react-icons/fa";
 import { getOfflineAyahs, getOfflineSurahs } from "../../utils/quranOffline";
 import Loading from "../../Componant/Loading/Loading";
 
